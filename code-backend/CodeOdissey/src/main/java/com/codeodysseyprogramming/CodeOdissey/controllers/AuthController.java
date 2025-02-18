@@ -28,30 +28,38 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+     @PostMapping("/login")
+    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(),
                 loginRequest.getPassword()
             )
         );
-
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
+        User user = userService.getUserByEmail(loginRequest.getEmail());
         
-        return ResponseEntity.ok(new JwtAuthResponse(jwt));
+        return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getRole().name()));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest) {
-        User user = new User();
-        user.setEmail(signUpRequest.getEmail());
-        user.setPasswordHash(signUpRequest.getPassword());
-        user.setRole(User.Role.STUDENT);
+    public ResponseEntity<JwtAuthResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
+        if (userService.existsByEmail(signUpRequest.getEmail())) {
+            throw new BadRequestException("Email already registered");
+        }
+
+        User user = userService.createUser(signUpRequest);
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                signUpRequest.getEmail(),
+                signUpRequest.getPassword()
+            )
+        );
         
-        userService.createUser(user);
-        
-        return ResponseEntity.ok("User registered successfully");
+        String jwt = tokenProvider.generateToken(authentication);
+        return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getRole().name()));
     }
 }
+
