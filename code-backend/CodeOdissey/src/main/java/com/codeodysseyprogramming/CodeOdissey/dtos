@@ -104,3 +104,52 @@ public class CourseResponse {
 
     // Getters and Setters
 }
+
+// CodeSubmissionRequest.java
+package com.codeodisseyprogramming.dtos.requests;
+
+public class CodeSubmissionRequest {
+    private String code;
+    private String language;
+
+    // Getters and Setters
+}
+
+// CodeExecutionResponse.java
+package com.codeodisseyprogramming.dtos.responses;
+
+import java.util.List;
+
+public class CodeExecutionResponse {
+    private boolean success;
+    private List<TestResult> testResults;
+    private int score;
+    private String message;
+
+    public CodeExecutionResponse(boolean success, List<TestResult> testResults) {
+        this.success = success;
+        this.testResults = testResults;
+    }
+
+    // Getters and Setters
+}
+
+// TestResult.java
+package com.codeodisseyprogramming.dtos.responses;
+
+public class TestResult {
+    private String description;
+    private boolean passed;
+    private String actualOutput;
+    private String expectedOutput;
+    private String errorMessage;
+
+    public TestResult(String description, boolean passed, String actualOutput, String expectedOutput) {
+        this.description = description;
+        this.passed = passed;
+        this.actualOutput = actualOutput;
+        this.expectedOutput = expectedOutput;
+    }
+
+    // Getters and Setters
+}
