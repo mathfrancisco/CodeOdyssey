@@ -1,5 +1,5 @@
 // JwtTokenProvider.java
-package com.codeodisseyprogramming.security;
+package com.codeodysseyprogramming.CodeOdissey.security;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,19 +44,8 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
-        } catch (SignatureException ex) {
-            // Log error
-            return false;
-        } catch (MalformedJwtException ex) {
-            // Log error
-            return false;
-        } catch (ExpiredJwtException ex) {
-            // Log error
-            return false;
-        } catch (UnsupportedJwtException ex) {
-            // Log error
-            return false;
-        } catch (IllegalArgumentException ex) {
+        } catch (SignatureException | UnsupportedJwtException | ExpiredJwtException | MalformedJwtException |
+                 IllegalArgumentException ex) {
             // Log error
             return false;
         }

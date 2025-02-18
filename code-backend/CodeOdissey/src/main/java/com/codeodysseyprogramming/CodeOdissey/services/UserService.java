@@ -1,7 +1,11 @@
-package com.codeodisseyprogramming.services;
+package com.codeodysseyprogramming.CodeOdissey.services;
 
-import com.codeodisseyprogramming.models.User;
-import com.codeodisseyprogramming.repositories.UserRepository;
+
+import com.codeodysseyprogramming.CodeOdissey.dto.request.UserUpdateRequest;
+import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
+import com.codeodysseyprogramming.CodeOdissey.exceptions.UnauthorizedException;
+import com.codeodysseyprogramming.CodeOdissey.models.User;
+import com.codeodysseyprogramming.CodeOdissey.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

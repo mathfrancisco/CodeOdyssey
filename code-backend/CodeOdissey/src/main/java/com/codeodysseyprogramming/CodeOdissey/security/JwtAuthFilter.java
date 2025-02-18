@@ -1,4 +1,4 @@
-package com.codeodisseyprogramming.security;
+package com.codeodysseyprogramming.CodeOdissey.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

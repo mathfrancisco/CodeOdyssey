@@ -1,4 +1,4 @@
-package com.codeodisseyprogramming.config;
+package com.codeodysseyprogramming.CodeOdissey.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

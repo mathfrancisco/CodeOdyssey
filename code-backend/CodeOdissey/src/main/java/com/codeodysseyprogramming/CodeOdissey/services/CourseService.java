@@ -1,8 +1,9 @@
-package com.codeodisseyprogramming.services;
+package com.codeodysseyprogramming.CodeOdissey.services;
 
-import com.codeodisseyprogramming.models.Course;
-import com.codeodisseyprogramming.repositories.CourseRepository;
-import com.codeodisseyprogramming.exceptions.ResourceNotFoundException;
+
+import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
+import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import com.codeodysseyprogramming.CodeOdissey.repositories.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;

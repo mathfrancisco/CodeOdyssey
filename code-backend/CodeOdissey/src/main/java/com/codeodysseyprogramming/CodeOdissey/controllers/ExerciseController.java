@@ -1,13 +1,20 @@
-package com.codeodisseyprogramming.controllers;
+package com.codeodysseyprogramming.CodeOdissey.controllers;
 
-import com.codeodisseyprogramming.models.Exercise;
-import com.codeodisseyprogramming.services.ExerciseService;
-import com.codeodisseyprogramming.dtos.requests.CodeSubmissionRequest;
-import com.codeodisseyprogramming.dtos.responses.CodeExecutionResponse;
+
+import com.codeodysseyprogramming.CodeOdissey.dto.request.CodeSubmissionRequest;
+import com.codeodysseyprogramming.CodeOdissey.dto.response.CodeExecutionResponse;
+import com.codeodysseyprogramming.CodeOdissey.models.Exercise;
+import com.codeodysseyprogramming.CodeOdissey.services.ExerciseService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/exercises")

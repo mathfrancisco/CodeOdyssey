@@ -1,12 +1,13 @@
-package com.codeodisseyprogramming.services;
+package com.codeodysseyprogramming.CodeOdissey.services;
 
-import com.codeodisseyprogramming.dtos.requests.LoginRequest;
-import com.codeodisseyprogramming.dtos.requests.SignUpRequest;
-import com.codeodisseyprogramming.dtos.responses.JwtAuthResponse;
-import com.codeodisseyprogramming.exceptions.BadRequestException;
-import com.codeodisseyprogramming.exceptions.UnauthorizedException;
-import com.codeodisseyprogramming.models.User;
-import com.codeodisseyprogramming.security.JwtTokenProvider;
+
+import com.codeodysseyprogramming.CodeOdissey.dto.request.LoginRequest;
+import com.codeodysseyprogramming.CodeOdissey.dto.request.SignUpRequest;
+import com.codeodysseyprogramming.CodeOdissey.dto.response.JwtAuthResponse;
+import com.codeodysseyprogramming.CodeOdissey.exceptions.UnauthorizedException;
+import com.codeodysseyprogramming.CodeOdissey.models.User;
+import com.codeodysseyprogramming.CodeOdissey.security.JwtTokenProvider;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
