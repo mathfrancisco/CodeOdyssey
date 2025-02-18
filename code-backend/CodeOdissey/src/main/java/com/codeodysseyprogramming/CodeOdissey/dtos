@@ -1,0 +1,34 @@
+// LoginRequest.java
+package com.codeodisseyprogramming.dtos.requests;
+
+public class LoginRequest {
+    private String email;
+    private String password;
+
+    // Getters and Setters
+}
+
+// SignUpRequest.java
+package com.codeodisseyprogramming.dtos.requests;
+
+public class SignUpRequest {
+    private String email;
+    private String password;
+    private String name;
+
+    // Getters and Setters
+}
+
+// JwtAuthResponse.java
+package com.codeodisseyprogramming.dtos.responses;
+
+public class JwtAuthResponse {
+    private String accessToken;
+    private String tokenType = "Bearer";
+
+    public JwtAuthResponse(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    // Getters and Setters
+}
