@@ -1,6 +1,7 @@
 package com.codeodysseyprogramming.CodeOdissey.services;
 
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
