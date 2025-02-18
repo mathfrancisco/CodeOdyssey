@@ -9,26 +9,44 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@Validated
 public class UserController {
-
     @Autowired
     private UserService userService;
-
+    
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(@RequestParam String email) {
-        return ResponseEntity.ok(userService.getUserByEmail(email));
+    public ResponseEntity<UserProfileResponse> getCurrentUser(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserByEmail(userDetails.getUsername());
+        return ResponseEntity.ok(mapToUserProfileResponse(user));
     }
 
     @PutMapping("/me")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        // Implement update logic
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserProfileResponse> updateUser(
+            @Valid @RequestBody UserUpdateRequest updateRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User updatedUser = userService.updateUser(
+            userDetails.getUsername(), 
+            updateRequest
+        );
+        return ResponseEntity.ok(mapToUserProfileResponse(updatedUser));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> getUserById(@PathVariable String id) {
-        // Implement get user by id
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UserProfileResponse> getUserById(@PathVariable String id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(mapToUserProfileResponse(user));
+    }
+
+    private UserProfileResponse mapToUserProfileResponse(User user) {
+        UserProfileResponse response = new UserProfileResponse();
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setName(user.getName());
+        response.setRole(user.getRole().name());
+        response.setAvatar(user.getProfile().getAvatar());
+        response.setBio(user.getProfile().getBio());
+        return response;
     }
 }
