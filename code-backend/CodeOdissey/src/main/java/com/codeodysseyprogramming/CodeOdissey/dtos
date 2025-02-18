@@ -153,3 +153,31 @@ public class TestResult {
 
     // Getters and Setters
 }
+// UserProfileResponse.java
+package com.codeodysseyprogramming.dtos.responses;
+
+import lombok.Data;
+
+@Data
+public class UserProfileResponse {
+    private String id;
+    private String email;
+    private String name;
+    private String role;
+    private String avatar;
+    private String bio;
+}
+
+// UserUpdateRequest.java
+package com.codeodysseyprogramming.dtos.requests;
+
+import lombok.Data;
+import javax.validation.constraints.NotBlank;
+
+@Data
+public class UserUpdateRequest {
+    @NotBlank
+    private String name;
+    private String bio;
+    private String avatar;
+}
