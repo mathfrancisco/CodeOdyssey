@@ -301,7 +301,7 @@ lms-backend/
 ```
 
 2. **courses**
-```json
+```
 {
   "_id": ObjectId,
   "title": String,
@@ -327,7 +327,7 @@ lms-backend/
 ```
 
 3. **progress**
-```json
+```
 {
   "_id": ObjectId,
   "userId": ObjectId,
@@ -351,7 +351,7 @@ lms-backend/
 ```
 
 4. **exercises**
-```json
+```
 {
   "_id": ObjectId,
   "title": String,
@@ -371,7 +371,7 @@ lms-backend/
 ```
 
 5. **discussions**
-```json
+```
 {
   "_id": ObjectId,
   "title": String,
