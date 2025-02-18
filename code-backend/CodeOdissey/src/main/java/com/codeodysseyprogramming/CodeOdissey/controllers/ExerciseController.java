@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/exercises")
+@Validated
 public class ExerciseController {
-
     @Autowired
     private ExerciseService exerciseService;
 
@@ -33,10 +33,21 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.getExerciseById(id));
     }
 
-    @PostMapping("/{id}/submit")
+   @PostMapping("/{id}/submit")
     public ResponseEntity<CodeExecutionResponse> submitSolution(
             @PathVariable String id,
-            @RequestBody CodeSubmissionRequest submission) {
-        return ResponseEntity.ok(exerciseService.submitSolution(id, submission));
+            @Valid @RequestBody CodeSubmissionRequest submission,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+            exerciseService.submitSolution(id, submission, userDetails.getUsername())
+        );
+    }
+     @GetMapping("/course/{courseId}")
+    public ResponseEntity<List<Exercise>> getExercisesByCourse(
+            @PathVariable String courseId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+            exerciseService.getExercisesByCourse(courseId, userDetails.getUsername())
+        );
     }
 }
