@@ -282,7 +282,7 @@ lms-backend/
 #### Principais Coleções
 
 1. **users**
-```json
+```
 {
   "_id": ObjectId,
   "email": String,
