@@ -14,18 +14,39 @@ public class UserService {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
-    public User createUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
+
+    // Add these methods
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public User updateUser(String email, UserUpdateRequest updateRequest) {
+        User user = getUserByEmail(email);
         
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setName(updateRequest.getName());
+        if (user.getProfile() == null) {
+            user.setProfile(new UserProfile());
+        }
+        user.getProfile().setBio(updateRequest.getBio());
+        user.getProfile().setAvatar(updateRequest.getAvatar());
+        
         return userRepository.save(user);
     }
-    
+
+    public User updatePassword(String email, String oldPassword, String newPassword) {
+        User user = getUserByEmail(email);
+        
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw new UnauthorizedException("Invalid old password");
+        }
+        
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
+
+    // Add proper exceptions instead of RuntimeException
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 }
