@@ -1,5 +1,6 @@
 package com.codeodysseyprogramming.CodeOdissey.exceptions;
 
+import com.codeodysseyprogramming.CodeOdissey.models.ErrorDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

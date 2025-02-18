@@ -1,10 +1,17 @@
-package com.codeodisseyprogramming.controllers;
+package com.codeodysseyprogramming.CodeOdissey.controllers;
 
-import com.codeodisseyprogramming.models.User;
-import com.codeodisseyprogramming.services.UserService;
+
+import com.codeodysseyprogramming.CodeOdissey.dto.request.UserUpdateRequest;
+import com.codeodysseyprogramming.CodeOdissey.dto.response.UserProfileResponse;
+import com.codeodysseyprogramming.CodeOdissey.models.User;
+import com.codeodysseyprogramming.CodeOdissey.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

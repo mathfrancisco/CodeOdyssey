@@ -1,3 +1,12 @@
+package com.codeodysseyprogramming.CodeOdissey.services;
+
+import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+
 @Service
 public class ProgressService {
     

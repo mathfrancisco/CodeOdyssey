@@ -1,12 +1,21 @@
-package com.codeodisseyprogramming.controllers;
+package com.codeodysseyprogramming.CodeOdissey.controllers;
 
-import com.codeodisseyprogramming.models.Course;
-import com.codeodisseyprogramming.services.CourseService;
-import com.codeodisseyprogramming.dtos.requests.CourseRequest;
-import com.codeodisseyprogramming.dtos.responses.CourseResponse;
+
+import com.codeodysseyprogramming.CodeOdissey.dto.request.CourseRequest;
+import com.codeodysseyprogramming.CodeOdissey.dto.response.CourseResponse;
+import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import com.codeodysseyprogramming.CodeOdissey.services.CourseService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

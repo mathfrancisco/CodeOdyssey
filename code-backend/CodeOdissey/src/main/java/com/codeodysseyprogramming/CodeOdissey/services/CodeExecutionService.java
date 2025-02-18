@@ -1,6 +1,9 @@
-package com.codeodisseyprogramming.services;
+package com.codeodysseyprogramming.CodeOdissey.services;
 
-import com.codeodisseyprogramming.models.Exercise;
+
+import com.codeodysseyprogramming.CodeOdissey.dto.response.CodeExecutionResponse;
+import com.codeodysseyprogramming.CodeOdissey.dto.response.TestResult;
+import com.codeodysseyprogramming.CodeOdissey.models.Exercise;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.ArrayList;

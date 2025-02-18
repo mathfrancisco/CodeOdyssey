@@ -1,9 +1,10 @@
-package com.codeodisseyprogramming.services;
+package com.codeodysseyprogramming.CodeOdissey.services;
 
-import com.codeodisseyprogramming.models.Exercise;
-import com.codeodisseyprogramming.repositories.ExerciseRepository;
-import com.codeodisseyprogramming.dtos.requests.CodeSubmissionRequest;
-import com.codeodisseyprogramming.dtos.responses.CodeExecutionResponse;
+import com.codeodysseyprogramming.CodeOdissey.dto.request.CodeSubmissionRequest;
+import com.codeodysseyprogramming.CodeOdissey.dto.response.CodeExecutionResponse;
+import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
+import com.codeodysseyprogramming.CodeOdissey.models.Exercise;
+import com.codeodysseyprogramming.CodeOdissey.repositories.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +61,7 @@ public class ExerciseService {
     }
 
     private void updateExerciseMetadata(Exercise exercise, boolean isSuccess) {
-        ExerciseMetadata metadata = exercise.getMetadata();
+        Exercise.ExerciseMetadata metadata = exercise.getMetadata();
         metadata.setTotalAttempts(metadata.getTotalAttempts() + 1);
         
         if (isSuccess) {

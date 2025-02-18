@@ -1,6 +1,7 @@
-package com.codeodisseyprogramming.repositories;
+package com.codeodysseyprogramming.CodeOdissey.repositories;
 
-import com.codeodisseyprogramming.models.User;
+
+import com.codeodysseyprogramming.CodeOdissey.models.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
