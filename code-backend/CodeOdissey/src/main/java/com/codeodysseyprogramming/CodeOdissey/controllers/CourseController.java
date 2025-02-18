@@ -13,15 +13,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/courses")
+@Validated
 public class CourseController {
-
     @Autowired
     private CourseService courseService;
 
+
     @PostMapping
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
-        return ResponseEntity.ok(courseService.createCourse(course));
+    public ResponseEntity<CourseResponse> createCourse(
+            @Valid @RequestBody CourseRequest courseRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Course course = courseService.createCourse(courseRequest, userDetails.getUsername());
+        return ResponseEntity.ok(mapToCourseResponse(course));
     }
 
     @PutMapping("/{id}")
@@ -34,17 +38,30 @@ public class CourseController {
     public ResponseEntity<Course> getCourse(@PathVariable String id) {
         return ResponseEntity.ok(courseService.getCourseById(id));
     }
+     @GetMapping
+    public ResponseEntity<Page<CourseResponse>> getAllCourses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "title") String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Page<Course> courses = courseService.getAllCourses(pageable);
+        return ResponseEntity.ok(courses.map(this::mapToCourseResponse));
+    }
 
     @GetMapping("/instructor/{instructorId}")
     public ResponseEntity<List<Course>> getCoursesByInstructor(@PathVariable String instructorId) {
         return ResponseEntity.ok(courseService.getCoursesByInstructor(instructorId));
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Course>> searchCourses(
+     @GetMapping("/search")
+    public ResponseEntity<Page<CourseResponse>> searchCourses(
             @RequestParam(required = false) List<String> technologies,
-            @RequestParam(required = false) Course.Level level) {
-        return ResponseEntity.ok(courseService.searchCourses(technologies, level));
+            @RequestParam(required = false) Course.Level level,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> courses = courseService.searchCourses(technologies, level, pageable);
+        return ResponseEntity.ok(courses.map(this::mapToCourseResponse));
     }
 
     @DeleteMapping("/{id}")
