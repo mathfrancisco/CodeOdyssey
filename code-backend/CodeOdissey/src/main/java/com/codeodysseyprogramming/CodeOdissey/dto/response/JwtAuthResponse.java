@@ -8,9 +8,15 @@ import lombok.Setter;
 @Setter
 public class JwtAuthResponse {
     private String tokenType = "Bearer";
+    private String accessToken;
+    private String id;
+    private String email;
+    private String role;
 
-    public JwtAuthResponse(String accessToken) {
+    public JwtAuthResponse(String accessToken, String id, String email, String role) {
+        this.accessToken = accessToken;
+        this.id = id;
+        this.email = email;
+        this.role = role;
     }
-
-    // Getters and Setters
 }

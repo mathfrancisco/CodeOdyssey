@@ -3,9 +3,12 @@ package com.codeodysseyprogramming.CodeOdissey.dto.request;
 
 
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
-
+@Getter
+@Setter
 public class CourseRequest {
     private String title;
     private String description;

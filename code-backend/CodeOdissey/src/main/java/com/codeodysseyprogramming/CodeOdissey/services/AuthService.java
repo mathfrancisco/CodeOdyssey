@@ -59,7 +59,7 @@ public class AuthService {
     }
 
     @Transactional
-    public JwtAuthResponse signup(SignUpRequest signUpRequest) {
+    public JwtAuthResponse signup(SignUpRequest signUpRequest) throws BadRequestException {
         // Validate if user already exists
         if (userService.existsByEmail(signUpRequest.getEmail())) {
             throw new BadRequestException("Email already registered");

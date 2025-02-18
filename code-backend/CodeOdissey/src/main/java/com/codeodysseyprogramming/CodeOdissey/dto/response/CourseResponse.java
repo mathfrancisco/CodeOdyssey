@@ -3,10 +3,13 @@ package com.codeodysseyprogramming.CodeOdissey.dto.response;
 
 
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Getter
+@Setter
 public class CourseResponse {
     private String id;
     private String title;

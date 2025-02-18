@@ -1,9 +1,12 @@
 package com.codeodysseyprogramming.CodeOdissey.models;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
-
+@Getter
+@Setter
 @Document(collection = "exercises")
 public class Exercise {
     @Id
@@ -22,7 +25,8 @@ public class Exercise {
     public enum Difficulty {
         EASY, MEDIUM, HARD
     }
-
+    @Getter
+    @Setter
     public static class TestCase {
         private String input;
         private String expectedOutput;
@@ -31,7 +35,8 @@ public class Exercise {
         
         // Getters and Setters
     }
-
+    @Getter
+    @Setter
     public static class ExerciseMetadata {
         private int averageCompletionTime;
         private int successRate;

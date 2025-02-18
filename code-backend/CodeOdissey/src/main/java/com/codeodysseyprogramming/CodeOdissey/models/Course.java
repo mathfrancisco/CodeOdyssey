@@ -1,10 +1,13 @@
 package com.codeodysseyprogramming.CodeOdissey.models;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Getter
+@Setter
 @Document(collection = "courses")
 public class Course {
     @Id
@@ -23,14 +26,16 @@ public class Course {
     public enum Level {
         BEGINNER, INTERMEDIATE, ADVANCED
     }
-
+    @Getter
+    @Setter
     public static class Module {
         private String title;
         private List<Lesson> lessons;
 
         // Getters and Setters
     }
-
+    @Getter
+    @Setter
     public static class Lesson {
         private String title;
         private String content;

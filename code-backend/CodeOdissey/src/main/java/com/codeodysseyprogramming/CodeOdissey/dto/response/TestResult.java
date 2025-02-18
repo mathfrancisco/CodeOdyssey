@@ -1,6 +1,11 @@
 // TestResult.java
 package com.codeodysseyprogramming.CodeOdissey.dto.response;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class TestResult {
     private String description;
     private boolean passed;

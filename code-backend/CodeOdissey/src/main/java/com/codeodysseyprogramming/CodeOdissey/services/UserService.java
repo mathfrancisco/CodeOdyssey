@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class UserService {
     
@@ -19,6 +21,20 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public User getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    }
+
+    public User createUser(User signUpRequest) {
+        User user = new User();
+        user.setEmail(signUpRequest.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(signUpRequest.getPassword()));
+        user.setName(signUpRequest.getName());
+        user.setRole(User.Role.STUDENT);
+        user.setCreatedAt(LocalDateTime.now());
+        return userRepository.save(user);
+    }
     // Add these methods
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);

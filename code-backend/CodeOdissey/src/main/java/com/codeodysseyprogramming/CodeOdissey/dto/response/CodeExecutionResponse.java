@@ -1,8 +1,12 @@
 // CodeExecutionResponse.java
 package com.codeodysseyprogramming.CodeOdissey.dto.response;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.List;
+@Getter
+@Setter
 public class CodeExecutionResponse {
     private boolean success;
     private List<TestResult> testResults;
