@@ -40,21 +40,38 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.getExerciseById(id));
     }
 
-   @PostMapping("/{id}/submit")
+  @PostMapping("/{id}/submit")
     public ResponseEntity<CodeExecutionResponse> submitSolution(
             @PathVariable String id,
             @Valid @RequestBody CodeSubmissionRequest submission,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(
-            exerciseService.submitSolution(id, submission, userDetails.getUsername())
+        CodeExecutionResponse response = exerciseService.submitSolution(
+            id, 
+            submission,
+            userDetails.getUsername()
         );
+        
+        // Update progress if submission was successful
+        if (response.isSuccess()) {
+            Exercise exercise = exerciseService.getExerciseById(id);
+            progressService.updateExerciseCompletion(
+                userDetails.getUsername(),
+                exercise.getLessonId(),
+                id
+            );
+        }
+        
+        return ResponseEntity.ok(response);
     }
-     @GetMapping("/course/{courseId}")
+      @GetMapping("/course/{courseId}")
     public ResponseEntity<List<Exercise>> getExercisesByCourse(
             @PathVariable String courseId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(
-            exerciseService.getExercisesByCourse(courseId, userDetails.getUsername())
-        );
+        // First check if user has access to the course
+        if (!progressService.hasAccessToCourse(userDetails.getUsername(), courseId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        return ResponseEntity.ok(exerciseService.getExercisesByCourse(courseId));
     }
 }
