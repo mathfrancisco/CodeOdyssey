@@ -32,6 +32,10 @@ public class Course {
         private String title;
         private List<Lesson> lessons;
 
+        public String getId() {
+            return title.toLowerCase().replace(" ", "-");
+        }
+
         // Getters and Setters
     }
     @Getter

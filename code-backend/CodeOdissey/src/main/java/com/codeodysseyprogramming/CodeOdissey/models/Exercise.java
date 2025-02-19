@@ -22,6 +22,9 @@ public class Exercise {
     private int pointsValue;
     private ExerciseMetadata metadata;
 
+    public String getLessonId() {
+        return id;
+    }
     public enum Difficulty {
         EASY, MEDIUM, HARD
     }

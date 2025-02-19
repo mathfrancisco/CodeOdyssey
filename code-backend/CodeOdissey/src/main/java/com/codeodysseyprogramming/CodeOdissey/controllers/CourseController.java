@@ -37,6 +37,21 @@ public class CourseController {
         return ResponseEntity.ok(mapToCourseResponse(course));
     }
 
+    private CourseResponse mapToCourseResponse(Course course) {
+        CourseResponse courseResponse = new CourseResponse();
+        courseResponse.setId(course.getId());
+        courseResponse.setTitle(course.getTitle());
+        courseResponse.setDescription(course.getDescription());
+        courseResponse.setLevel(course.getLevel());
+        courseResponse.setTechnologies(course.getTechnologies());
+        courseResponse.setInstructorId(course.getInstructorId());
+        courseResponse.setEnrolledCount(course.getEnrolledCount());
+        courseResponse.setRating(course.getRating());
+        courseResponse.setCreatedAt(course.getCreatedAt());
+        courseResponse.setUpdatedAt(course.getUpdatedAt());
+        return courseResponse;
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ResponseEntity<Course> updateCourse(@PathVariable String id, @RequestBody Course course) {
@@ -69,7 +84,7 @@ public class CourseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Course> courses = courseService.searchCourses(technologies, level, pageable);
+        Page<Course> courses = (Page<Course>) courseService.searchCourses(technologies, level, pageable);
         return ResponseEntity.ok(courses.map(this::mapToCourseResponse));
     }
 

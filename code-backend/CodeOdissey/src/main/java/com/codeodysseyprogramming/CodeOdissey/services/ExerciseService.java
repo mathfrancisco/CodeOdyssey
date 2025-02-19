@@ -8,6 +8,8 @@ import com.codeodysseyprogramming.CodeOdissey.repositories.ExerciseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ExerciseService {
     
@@ -71,5 +73,9 @@ public class ExerciseService {
     public void updateExerciseMetadata(Exercise exercise, Exercise.ExerciseMetadata metadata) {
         exercise.setMetadata(metadata);
         exerciseRepository.save(exercise);
+    }
+
+    public List<Exercise> getExercisesByCourse(String courseId) {
+        return exerciseRepository.findByCourseId(courseId);
     }
 }

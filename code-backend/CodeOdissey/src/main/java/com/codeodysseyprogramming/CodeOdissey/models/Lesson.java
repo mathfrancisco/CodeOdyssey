@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -22,6 +24,10 @@ public class Lesson {
     private List<Resource> resources;
     private Prerequisites prerequisites;
     private LessonMetadata metadata;
+
+    public Collection<Object> getExercises() {
+        return null;
+    }
 
     @Getter
     @Setter

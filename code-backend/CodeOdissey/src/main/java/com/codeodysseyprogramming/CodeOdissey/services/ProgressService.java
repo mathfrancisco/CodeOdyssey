@@ -2,6 +2,7 @@ package com.codeodysseyprogramming.CodeOdissey.services;
 
 import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import com.codeodysseyprogramming.CodeOdissey.models.Lesson;
 import com.codeodysseyprogramming.CodeOdissey.models.Progress;
 import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class ProgressService {
     
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private LessonService lessonService;
 
     public Progress startCourse(String userId, String courseId) {
         Course course = courseService.getCourseById(courseId);
@@ -80,7 +84,10 @@ public class ProgressService {
 
     public Progress getProgress(String userId, String courseId) {
         return progressRepository.findByUserIdAndCourseId(userId, courseId)
+            .stream()
+            .findFirst()
             .orElseThrow(() -> new ResourceNotFoundException("Progress not found"));
+
     }
 
     public List<Progress> getUserProgress(String userId) {
@@ -108,5 +115,26 @@ public class ProgressService {
                     });
             }
         }
+    }
+
+    public boolean isLessonCompleted(String userId, String reqLessonId) {
+        List<Progress> userProgress = progressRepository.findByUserId(userId);
+
+        for (Progress progress : userProgress) {
+            for (Progress.ModuleProgress moduleProgress : progress.getModulesProgress()) {
+                for (Progress.LessonProgress lessonProgress : moduleProgress.getLessonsProgress()) {
+                    if (lessonProgress.getLessonId().equals(reqLessonId)) {
+                        return lessonProgress.getStatus() == Progress.Status.COMPLETED;
+                    }
+                }
+            }
+        }
+
+        return false;
+
+    }
+
+    public boolean hasAccessToCourse(String username, String courseId) {
+        return !progressRepository.findByUserIdAndCourseId(username, courseId).isEmpty();
     }
 }

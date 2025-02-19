@@ -1,10 +1,14 @@
 package com.codeodysseyprogramming.CodeOdissey.services;
 
 
+import com.codeodysseyprogramming.CodeOdissey.dto.request.CourseRequest;
 import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
 import com.codeodysseyprogramming.CodeOdissey.repositories.CourseRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,11 +19,16 @@ public class CourseService {
     @Autowired
     private CourseRepository courseRepository;
     
-    public Course createCourse(Course course) {
+    public Course createCourse(@Valid CourseRequest courseRequest, String username) {
+        Course course = new Course();
+        course.setTitle(courseRequest.getTitle());
+        course.setDescription(courseRequest.getDescription());
+        course.setLevel(courseRequest.getLevel());
+        course.setTechnologies(courseRequest.getTechnologies());
+        course.setInstructorId(username);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
-        course.setEnrolledCount(0);
-        course.setRating(0.0);
+
         return courseRepository.save(course);
     }
     
@@ -50,12 +59,17 @@ public class CourseService {
         return courseRepository.findByLevel(level);
     }
     
-    public List<Course> searchCourses(List<String> technologies, Course.Level level) {
+    public List<Course> searchCourses(List<String> technologies, Course.Level level, Pageable pageable) {
         return courseRepository.findByTechnologiesAndLevel(technologies, level);
     }
     
     public void deleteCourse(String id) {
         Course course = getCourseById(id);
         courseRepository.delete(course);
+    }
+
+
+    public Page<Course> getAllCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable);
     }
 }

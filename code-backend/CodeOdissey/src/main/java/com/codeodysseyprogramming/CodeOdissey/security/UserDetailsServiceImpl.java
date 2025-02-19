@@ -40,4 +40,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetailsServiceImpl loadUserById(String userId) {
         return null;
     }
+
+    public String getEmail() {
+        return null;
+    }
 }

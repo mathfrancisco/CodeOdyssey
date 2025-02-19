@@ -5,8 +5,10 @@ import com.codeodysseyprogramming.CodeOdissey.dto.request.CodeSubmissionRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.response.CodeExecutionResponse;
 import com.codeodysseyprogramming.CodeOdissey.models.Exercise;
 import com.codeodysseyprogramming.CodeOdissey.services.ExerciseService;
+import com.codeodysseyprogramming.CodeOdissey.services.ProgressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +24,9 @@ import java.util.List;
 public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
+
+    @Autowired
+    private ProgressService progressService;
 
     @PostMapping
     @PreAuthorize("hasRole('INSTRUCTOR')")

@@ -80,4 +80,8 @@ public class CodeExecutionService {
         // TODO: Implement actual code execution service integration
         return "Simulated output";
     }
+
+    public List<CodeSubmission> getExerciseSubmissions(String exerciseId) {
+        return codeSubmissionRepository.findByExerciseId(exerciseId);
+    }
 }
