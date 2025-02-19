@@ -37,3 +37,12 @@ export interface UserStats {
   streak: number;
   averageScore: number;
 }
+
+export class UserProfileResponse {
+
+
+}
+
+export class UserUpdateRequest {
+
+}

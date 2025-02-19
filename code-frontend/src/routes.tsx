@@ -7,7 +7,8 @@ import LessonPage from './pages/Lesson';
 import ProfilePage from './pages/Profile';
 import DashboardPage from './pages/Dashboard';
 import Layout from './components/layout/Layout';
-import ProtectedRoute from './components/common/ProtectedRoute';
+import ProtectedRoute from './components/commom/ProtectedRoute';
+
 
 const router = createBrowserRouter([
   {
