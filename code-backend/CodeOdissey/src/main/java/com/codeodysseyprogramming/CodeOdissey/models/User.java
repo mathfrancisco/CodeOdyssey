@@ -15,7 +15,7 @@ import java.util.List;
 public class User {
     @Id
     private String id;
-    
+
     @Indexed(unique = true)
     private String email;
     private String passwordHash;
@@ -25,7 +25,7 @@ public class User {
     private UserPreferences preferences;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
-    
+
     @Getter
     @Setter
     public static class Profile {
@@ -33,10 +33,10 @@ public class User {
         private String bio;
         private List<String> socialLinks;
     }
-    
+
     public User() {
         this.createdAt = LocalDateTime.now();
         this.profile = new Profile();
-        this.preferences = new UserPreferences();
+        this.preferences = UserPreferences.getDefault();
     }
 }

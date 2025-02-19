@@ -32,4 +32,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .disabled(false)
                 .build();
     }
+
+    public Iterable<Object> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_STUDENT"));
+    }
+
+    public UserDetailsServiceImpl loadUserById(String userId) {
+        return null;
+    }
 }

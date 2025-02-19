@@ -6,6 +6,7 @@ import com.codeodysseyprogramming.CodeOdissey.dto.request.SignUpRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.response.JwtAuthResponse;
 import com.codeodysseyprogramming.CodeOdissey.exceptions.UnauthorizedException;
 import com.codeodysseyprogramming.CodeOdissey.models.User;
+import com.codeodysseyprogramming.CodeOdissey.models.Role;
 import com.codeodysseyprogramming.CodeOdissey.security.JwtTokenProvider;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,31 +66,25 @@ public class AuthService {
             throw new BadRequestException("Email already registered");
         }
 
-        // Create new user
-        User user = new User();
-        user.setEmail(signUpRequest.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(signUpRequest.getPassword()));
-        user.setName(signUpRequest.getName());
-        user.setRole(User.Role.STUDENT); // Default role for new signups
-
-        user = userService.createUser(user);
+        // Create new user directly using userService
+        User user = userService.createUser(signUpRequest);
 
         // Authenticate the new user
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                signUpRequest.getEmail(),
-                signUpRequest.getPassword()
-            )
+                new UsernamePasswordAuthenticationToken(
+                        signUpRequest.getEmail(),
+                        signUpRequest.getPassword()
+                )
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
 
         return new JwtAuthResponse(
-            jwt,
-            user.getId(),
-            user.getEmail(),
-            user.getRole().name()
+                jwt,
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name()
         );
     }
 

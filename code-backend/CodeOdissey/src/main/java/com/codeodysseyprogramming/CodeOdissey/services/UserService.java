@@ -1,11 +1,14 @@
 package com.codeodysseyprogramming.CodeOdissey.services;
 
 
+import com.codeodysseyprogramming.CodeOdissey.dto.request.SignUpRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.request.UserUpdateRequest;
 import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.exceptions.UnauthorizedException;
+import com.codeodysseyprogramming.CodeOdissey.models.Role;
 import com.codeodysseyprogramming.CodeOdissey.models.User;
 import com.codeodysseyprogramming.CodeOdissey.repositories.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,12 +29,12 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
-    public User createUser(User signUpRequest) {
+    public User createUser(@Valid SignUpRequest signUpRequest) {
         User user = new User();
         user.setEmail(signUpRequest.getEmail());
         user.setPasswordHash(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setName(signUpRequest.getName());
-        user.setRole(User.Role.STUDENT);
+        user.setRole(Role.STUDENT);
         user.setCreatedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
@@ -45,7 +48,7 @@ public class UserService {
         
         user.setName(updateRequest.getName());
         if (user.getProfile() == null) {
-            user.setProfile(new UserProfile());
+            user.setProfile(new User.Profile());
         }
         user.getProfile().setBio(updateRequest.getBio());
         user.getProfile().setAvatar(updateRequest.getAvatar());

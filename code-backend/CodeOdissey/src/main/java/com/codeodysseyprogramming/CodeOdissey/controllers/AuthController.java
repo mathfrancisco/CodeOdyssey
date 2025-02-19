@@ -40,12 +40,12 @@ public class AuthController {
                 loginRequest.getPassword()
             )
         );
-        
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
         User user = userService.getUserByEmail(loginRequest.getEmail());
-        
-        return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getRole().name()));
+
+         return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getEmail(), user.getRole().name()));
     }
 
     @PostMapping("/signup")
@@ -56,14 +56,13 @@ public class AuthController {
 
         User user = userService.createUser(signUpRequest);
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                signUpRequest.getEmail(),
-                signUpRequest.getPassword()
-            )
+                new UsernamePasswordAuthenticationToken(
+                        signUpRequest.getEmail(),
+                        signUpRequest.getPassword()
+                )
         );
-        
+
         String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getRole().name()));
-    }
-}
+        return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getEmail(), user.getRole().name()));
+    }}
 

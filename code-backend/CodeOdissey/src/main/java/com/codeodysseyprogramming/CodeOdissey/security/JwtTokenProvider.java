@@ -22,10 +22,10 @@ public class JwtTokenProvider {
     private int jwtExpirationInMs;
     
     public String generateToken(Authentication authentication) {
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        UserDetailsServiceImpl userPrincipal = (UserDetailsServiceImpl) authentication.getPrincipal();
         
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userPrincipal.getAuthorities().iterator().next().getAuthority());
+        claims.put("role", userPrincipal.getAuthorities().iterator().next().toString());
         
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
@@ -63,5 +63,13 @@ public class JwtTokenProvider {
             logger.error("JWT claims string is empty");
         }
         return false;
+    }
+
+    public String getUserIdFromJWT(String jwt) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(jwt)
+                .getBody();
+        return claims.getSubject();
     }
 }
