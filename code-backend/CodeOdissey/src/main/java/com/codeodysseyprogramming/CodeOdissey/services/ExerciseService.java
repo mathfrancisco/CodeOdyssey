@@ -11,11 +11,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExerciseService {
     
-    @Autowired
+   @Autowired
     private ExerciseRepository exerciseRepository;
     
     @Autowired
     private CodeExecutionService codeExecutionService;
+    
+    @Autowired
+    private ProgressService progressService;
 
     public Exercise createExercise(Exercise exercise) {
         // Initialize metadata
@@ -44,34 +47,29 @@ public class ExerciseService {
             .orElseThrow(() -> new ResourceNotFoundException("Exercise not found with id: " + id));
     }
 
-    public CodeExecutionResponse submitSolution(String exerciseId, CodeSubmissionRequest submission) {
+    public CodeExecutionResponse submitSolution(String exerciseId, CodeSubmissionRequest submission, String userId) {
         Exercise exercise = getExerciseById(exerciseId);
         
-        // Execute code against test cases
-        CodeExecutionResponse response = codeExecutionService.executeCode(
+        // Execute code and update progress
+        CodeExecutionResponse response = codeExecutionService.submitSolution(
+            exerciseId,
             submission.getCode(),
-            exercise.getLanguage(),
-            exercise.getTestCases()
+            userId
         );
         
-        // Update exercise metadata
-        updateExerciseMetadata(exercise, response.isSuccess());
+        if (response.isSuccess()) {
+            // Update course progress if exercise is part of a lesson
+            if (exercise.getLessonId() != null) {
+                progressService.updateExerciseCompletion(userId, exercise.getLessonId(), exerciseId);
+            }
+        }
         
         return response;
     }
 
-    void updateExerciseMetadata(Exercise exercise, Exercise.ExerciseMetadata isSuccess) {
-        Exercise.ExerciseMetadata metadata = exercise.getMetadata();
-        metadata.setTotalAttempts(metadata.getTotalAttempts() + 1);
-        
-        if (isSuccess) {
-            metadata.setTotalCompletions(metadata.getTotalCompletions() + 1);
-        }
-        
-        metadata.setSuccessRate(
-            (metadata.getTotalCompletions() * 100) / metadata.getTotalAttempts()
-        );
-        
+     // Helper method for CodeExecutionService
+    public void updateExerciseMetadata(Exercise exercise, Exercise.ExerciseMetadata metadata) {
+        exercise.setMetadata(metadata);
         exerciseRepository.save(exercise);
     }
 }
