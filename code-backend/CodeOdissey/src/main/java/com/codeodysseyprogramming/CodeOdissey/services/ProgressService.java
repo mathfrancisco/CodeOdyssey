@@ -86,4 +86,27 @@ public class ProgressService {
     public List<Progress> getUserProgress(String userId) {
         return progressRepository.findByUserId(userId);
     }
+    
+     public void updateExerciseCompletion(String userId, String lessonId, String exerciseId) {
+        // Find the progress containing this lesson
+        List<Progress> userProgress = progressRepository.findByUserId(userId);
+        
+        for (Progress progress : userProgress) {
+            for (Progress.ModuleProgress moduleProgress : progress.getModulesProgress()) {
+                moduleProgress.getLessonsProgress().stream()
+                    .filter(lp -> lp.getLessonId().equals(lessonId))
+                    .findFirst()
+                    .ifPresent(lessonProgress -> {
+                        // Update exercise completion
+                        lessonProgress.getCompletedExercises().add(exerciseId);
+                        
+                        // Check if all exercises in the lesson are completed
+                        Lesson lesson = lessonService.getLessonById(lessonId);
+                        if (lessonProgress.getCompletedExercises().size() == lesson.getExercises().size()) {
+                            updateProgress(userId, progress.getCourseId(), moduleProgress.getModuleId(), lessonId);
+                        }
+                    });
+            }
+        }
+    }
 }
