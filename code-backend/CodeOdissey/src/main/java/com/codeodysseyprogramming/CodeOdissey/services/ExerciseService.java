@@ -60,7 +60,7 @@ public class ExerciseService {
         return response;
     }
 
-    private void updateExerciseMetadata(Exercise exercise, boolean isSuccess) {
+    void updateExerciseMetadata(Exercise exercise, Exercise.ExerciseMetadata isSuccess) {
         Exercise.ExerciseMetadata metadata = exercise.getMetadata();
         metadata.setTotalAttempts(metadata.getTotalAttempts() + 1);
         

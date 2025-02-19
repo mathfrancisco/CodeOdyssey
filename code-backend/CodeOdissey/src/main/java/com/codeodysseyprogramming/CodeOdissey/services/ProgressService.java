@@ -1,11 +1,14 @@
 package com.codeodysseyprogramming.CodeOdissey.services;
 
+import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
+import com.codeodysseyprogramming.CodeOdissey.models.Progress;
 import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,9 +30,9 @@ public class ProgressService {
         progress.setStatus(Progress.Status.IN_PROGRESS);
         
         // Initialize module progress
-        List<ModuleProgress> moduleProgress = course.getModules().stream()
+        List<Progress.ModuleProgress> moduleProgress = course.getModules().stream()
             .map(module -> {
-                ModuleProgress mp = new ModuleProgress();
+                Progress.ModuleProgress mp = new Progress.ModuleProgress();
                 mp.setModuleId(module.getId());
                 mp.setCompleted(false);
                 return mp;
@@ -41,7 +44,7 @@ public class ProgressService {
         return progressRepository.save(progress);
     }
 
-    public Progress updateProgress(String userId, String courseId, String moduleId, String lessonId) {
+    public void updateProgress(String userId, String courseId, String moduleId, String lessonId) {
         Progress progress = getProgress(userId, courseId);
         
         // Update lesson completion
@@ -65,14 +68,14 @@ public class ProgressService {
         
         // Check if course is completed
         boolean allModulesCompleted = progress.getModulesProgress().stream()
-            .allMatch(ModuleProgress::isCompleted);
+            .allMatch(Progress.ModuleProgress::isCompleted);
         
         if (allModulesCompleted) {
             progress.setStatus(Progress.Status.COMPLETED);
             progress.setCompletedAt(LocalDateTime.now());
         }
-        
-        return progressRepository.save(progress);
+
+        progressRepository.save(progress);
     }
 
     public Progress getProgress(String userId, String courseId) {

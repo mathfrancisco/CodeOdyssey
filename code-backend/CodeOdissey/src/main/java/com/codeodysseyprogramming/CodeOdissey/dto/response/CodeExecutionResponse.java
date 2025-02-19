@@ -1,6 +1,7 @@
 // CodeExecutionResponse.java
 package com.codeodysseyprogramming.CodeOdissey.dto.response;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,5 +19,5 @@ public class CodeExecutionResponse {
         this.testResults = testResults;
     }
 
-    // Getters and Setters
+
 }
