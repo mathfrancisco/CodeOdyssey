@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import coursesService, { Course as CourseType, Lesson } from '../services/courses.service';
+import coursesService from '../services/courses.service';
 import userService from '../services/user.service';
 import { useAppSelector, useAppDispatch } from '../store/slices/hooks';
 import { enrollCourse } from '../store/slices/progressSlice';
 import { formatDuration, formatDate } from '../utils/formatters';
+import { Course as CourseType, Module, Lesson } from '../types/courses';
 
 const Course: React.FC = () => {
   const { id } = useParams<{ id: string }>();
