@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store/slices/hooks';
-import { login } from '../store/slices/authSlice';
+import authService from '../services/auth.service';
+import { authStart, setUser, authFail } from '../store/slices/authSlice';
 import authService from '../services/auth.service';
 
 const Login: React.FC = () => {
