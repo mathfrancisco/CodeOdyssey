@@ -51,5 +51,12 @@ updateUser: (state, action: PayloadAction<{name: string, email: string}>) => {
     };
   }
 },
-export const { authStart, setUser, authFail, clearUser, clearError } = authSlice.actions;
+export const { 
+  authStart, 
+  setUser, 
+  authFail, 
+  clearUser, 
+  clearError,
+  updateUser 
+} = authSlice.actions;
 export default authSlice.reducer;
