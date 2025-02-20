@@ -1,4 +1,6 @@
 export interface Course {
+  requirements: string[];
+  goals: string[];
   id: string;
   title: string;
   description: string;

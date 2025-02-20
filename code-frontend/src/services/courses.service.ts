@@ -37,6 +37,7 @@ const coursesService = {
   async getUserProgress(courseId: string) {
     const response = await api.get(`/progress/course/${courseId}`);
     return response.data;
+
   }
 };
 

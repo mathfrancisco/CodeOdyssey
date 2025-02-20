@@ -25,7 +25,8 @@ const userService = {
   async getUserSubmissions() {
     const response = await api.get('/users/submissions');
     return response.data;
-  }
+  },
+
 };
 
 export default userService;
