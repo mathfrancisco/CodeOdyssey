@@ -43,6 +43,13 @@ const authSlice = createSlice({
     },
   },
 });
-
+updateUser: (state, action: PayloadAction<{name: string, email: string}>) => {
+  if (state.user) {
+    state.user = {
+      ...state.user,
+      ...action.payload
+    };
+  }
+},
 export const { authStart, setUser, authFail, clearUser, clearError } = authSlice.actions;
 export default authSlice.reducer;
