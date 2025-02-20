@@ -2,8 +2,8 @@ package com.codeodysseyprogramming.CodeOdissey.services;
 
 import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.models.Course;
-import com.codeodysseyprogramming.CodeOdissey.models.Lesson;
 import com.codeodysseyprogramming.CodeOdissey.models.Progress;
+import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressOperations;
 import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ProgressService {
-    
+public class ProgressService implements ProgressOperations {
     @Autowired
     private ProgressRepository progressRepository;
-    
-    @Autowired
-    private CourseService courseService;
 
     @Autowired
-    private LessonService lessonService;
+    private CourseService courseService;
 
     public Progress startCourse(String userId, String courseId) {
         Course course = courseService.getCourseById(courseId);
@@ -48,6 +44,7 @@ public class ProgressService {
         return progressRepository.save(progress);
     }
 
+    @Override
     public void updateProgress(String userId, String courseId, String moduleId, String lessonId) {
         Progress progress = getProgress(userId, courseId);
         
@@ -93,37 +90,33 @@ public class ProgressService {
     public List<Progress> getUserProgress(String userId) {
         return progressRepository.findByUserId(userId);
     }
-    
-     public void updateExerciseCompletion(String userId, String lessonId, String exerciseId) {
-        // Find the progress containing this lesson
+
+    @Override
+    public void updateExerciseCompletion(String userId, String lessonId, String exerciseId) {
         List<Progress> userProgress = progressRepository.findByUserId(userId);
-        
+
         for (Progress progress : userProgress) {
             for (Progress.ModuleProgress moduleProgress : progress.getModulesProgress()) {
                 moduleProgress.getLessonsProgress().stream()
-                    .filter(lp -> lp.getLessonId().equals(lessonId))
-                    .findFirst()
-                    .ifPresent(lessonProgress -> {
-                        // Update exercise completion
-                        lessonProgress.getCompletedExercises().add(exerciseId);
-                        
-                        // Check if all exercises in the lesson are completed
-                        Lesson lesson = lessonService.getLessonById(lessonId);
-                        if (lessonProgress.getCompletedExercises().size() == lesson.getExercises().size()) {
+                        .filter(lp -> lp.getLessonId().equals(lessonId))
+                        .findFirst()
+                        .ifPresent(lessonProgress -> {
+                            lessonProgress.getCompletedExercises().add(exerciseId);
+                            // Note: Removed direct LessonService dependency
                             updateProgress(userId, progress.getCourseId(), moduleProgress.getModuleId(), lessonId);
-                        }
-                    });
+                        });
             }
         }
     }
 
-    public boolean isLessonCompleted(String userId, String reqLessonId) {
+    @Override
+    public boolean isLessonCompleted(String userId, String lessonId) {
         List<Progress> userProgress = progressRepository.findByUserId(userId);
 
         for (Progress progress : userProgress) {
             for (Progress.ModuleProgress moduleProgress : progress.getModulesProgress()) {
                 for (Progress.LessonProgress lessonProgress : moduleProgress.getLessonsProgress()) {
-                    if (lessonProgress.getLessonId().equals(reqLessonId)) {
+                    if (lessonProgress.getLessonId().equals(lessonId)) {
                         return lessonProgress.getStatus() == Progress.Status.COMPLETED;
                     }
                 }

@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface LessonRepository extends MongoRepository<Lesson, String> {
-    List<Lesson> findByExerciseId(String exerciseId);
+    // Change from findByExerciseId to findByExerciseIdsContaining
+    List<Lesson> findByExerciseIdsContaining(String exerciseId);
     List<Lesson> findByCourseId(String courseId);
-    List<Lesson> findByCourseIdAndExerciseId(String courseId, String exerciseId);
-
+    List<Lesson> findByCourseIdAndExerciseIdsContaining(String courseId, String exerciseId);
 }

@@ -5,6 +5,7 @@ import com.codeodysseyprogramming.CodeOdissey.dto.response.CodeExecutionResponse
 import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.models.Exercise;
 import com.codeodysseyprogramming.CodeOdissey.repositories.ExerciseRepository;
+import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,15 +13,14 @@ import java.util.List;
 
 @Service
 public class ExerciseService {
-    
-   @Autowired
+    @Autowired
     private ExerciseRepository exerciseRepository;
-    
+
     @Autowired
     private CodeExecutionService codeExecutionService;
-    
+
     @Autowired
-    private ProgressService progressService;
+    private ProgressOperations progressOperations;  // Use interface instead of concrete class
 
     public Exercise createExercise(Exercise exercise) {
         // Initialize metadata
@@ -51,21 +51,29 @@ public class ExerciseService {
 
     public CodeExecutionResponse submitSolution(String exerciseId, CodeSubmissionRequest submission, String userId) {
         Exercise exercise = getExerciseById(exerciseId);
-        
-        // Execute code and update progress
+
         CodeExecutionResponse response = codeExecutionService.submitSolution(
-            exerciseId,
-            submission.getCode(),
-            userId
+                exercise,
+                submission.getCode(),
+                userId
         );
-        
+
         if (response.isSuccess()) {
-            // Update course progress if exercise is part of a lesson
+            Exercise.ExerciseMetadata metadata = new Exercise.ExerciseMetadata();
+            metadata.setTotalAttempts(exercise.getMetadata().getTotalAttempts() + 1);
+            metadata.setTotalCompletions(exercise.getMetadata().getTotalCompletions() + 1);
+            updateExerciseMetadata(exercise, metadata);
+
             if (exercise.getLessonId() != null) {
-                progressService.updateExerciseCompletion(userId, exercise.getLessonId(), exerciseId);
+                progressOperations.updateExerciseCompletion(userId, exercise.getLessonId(), exerciseId);
             }
+        } else {
+            Exercise.ExerciseMetadata metadata = new Exercise.ExerciseMetadata();
+            metadata.setTotalAttempts(exercise.getMetadata().getTotalAttempts() + 1);
+            metadata.setTotalCompletions(exercise.getMetadata().getTotalCompletions());
+            updateExerciseMetadata(exercise, metadata);
         }
-        
+
         return response;
     }
 

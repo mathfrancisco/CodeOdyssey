@@ -18,13 +18,7 @@ public class CodeExecutionService {
     @Autowired
     private CodeSubmissionRepository codeSubmissionRepository;
 
-    @Autowired
-    private ExerciseService exerciseService;
-
-    @Autowired
-    private ProgressService progressService;
-
-    public CodeExecutionResponse executeCode(String code, String language, List<Exercise.TestCase> testCases) {
+    public CodeExecutionResponse executeCode(String code, String language, List<Exercise.TestCase> testCases){
         List<TestResult> results = new ArrayList<>();
         boolean allTestsPassed = true;
 
@@ -39,27 +33,18 @@ public class CodeExecutionService {
         return new CodeExecutionResponse(allTestsPassed, results);
     }
 
-    public CodeExecutionResponse submitSolution(String exerciseId, String code, String userId) {
-        Exercise exercise = exerciseService.getExerciseById(exerciseId);
+    public CodeExecutionResponse submitSolution(Exercise exercise, String code, String userId) {
         CodeExecutionResponse executionResponse = executeCode(code, exercise.getLanguage(), exercise.getTestCases());
 
         // Save submission
         CodeSubmission submission = new CodeSubmission();
         submission.setUserId(userId);
-        submission.setExerciseId(exerciseId);
+        submission.setExerciseId(exercise.getId());  // Assuming getId() method exists
         submission.setCode(code);
         submission.setLanguage(exercise.getLanguage());
         submission.setSuccessful(executionResponse.isSuccess());
         submission.setSubmittedAt(LocalDateTime.now());
         codeSubmissionRepository.save(submission);
-
-        // Update exercise statistics
-        Exercise.ExerciseMetadata metadata = new Exercise.ExerciseMetadata();
-        metadata.setTotalAttempts(exercise.getMetadata().getTotalAttempts() + 1);
-        if (executionResponse.isSuccess()) {
-            metadata.setTotalCompletions(exercise.getMetadata().getTotalCompletions() + 1);
-        }
-        exerciseService.updateExerciseMetadata(exercise, metadata);
 
         return executionResponse;
     }

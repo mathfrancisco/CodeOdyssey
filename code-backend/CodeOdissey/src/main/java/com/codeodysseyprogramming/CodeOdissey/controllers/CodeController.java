@@ -4,7 +4,9 @@ import com.codeodysseyprogramming.CodeOdissey.dto.request.CodeExecutionRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.request.CodeSubmissionRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.response.CodeExecutionResponse;
 import com.codeodysseyprogramming.CodeOdissey.models.CodeSubmission;
+import com.codeodysseyprogramming.CodeOdissey.models.Exercise;
 import com.codeodysseyprogramming.CodeOdissey.services.CodeExecutionService;
+import com.codeodysseyprogramming.CodeOdissey.services.ExerciseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import java.util.Map;
 public class CodeController {
     @Autowired
     private CodeExecutionService codeExecutionService;
+    @Autowired
+    private ExerciseService exerciseService;
 
     @PostMapping("/execute")
     public ResponseEntity<CodeExecutionResponse> executeCode(
@@ -41,9 +45,14 @@ public class CodeController {
             @PathVariable String exerciseId,
             @Valid @RequestBody CodeSubmissionRequest submission,
             @AuthenticationPrincipal UserDetails userDetails) {
+
+        // First fetch the exercise using exerciseService
+        Exercise exercise = exerciseService.getExerciseById(exerciseId);
+
+        // Then call the updated codeExecutionService method
         return ResponseEntity.ok(
                 codeExecutionService.submitSolution(
-                        exerciseId,
+                        exercise,
                         submission.getCode(),
                         userDetails.getUsername()
                 )

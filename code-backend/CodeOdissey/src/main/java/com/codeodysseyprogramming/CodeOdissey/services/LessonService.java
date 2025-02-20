@@ -3,6 +3,7 @@ package com.codeodysseyprogramming.CodeOdissey.services;
 import com.codeodysseyprogramming.CodeOdissey.exceptions.ResourceNotFoundException;
 import com.codeodysseyprogramming.CodeOdissey.models.Lesson;
 import com.codeodysseyprogramming.CodeOdissey.repositories.LessonRepository;
+import com.codeodysseyprogramming.CodeOdissey.repositories.ProgressOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,15 +11,11 @@ import java.util.List;
 
 @Service
 public class LessonService {
-
     @Autowired
     private LessonRepository lessonRepository;
 
     @Autowired
-    private ProgressService progressService;
-
-    @Autowired
-    private ExerciseService exerciseService;
+    private ProgressOperations progressOperations;  // Use interface instead of concrete class
 
     public Lesson createLesson(Lesson lesson) {
         lesson.setMetadata(new Lesson.LessonMetadata());
@@ -38,8 +35,8 @@ public class LessonService {
         metadata.setCompletionCount(metadata.getCompletionCount() + 1);
         lessonRepository.save(lesson);
 
-        // Update user progress
-        progressService.updateProgress(userId, courseId, moduleId, lessonId);
+        // Update user progress using the interface
+        progressOperations.updateProgress(userId, courseId, moduleId, lessonId);
     }
 
     public boolean checkPrerequisites(String userId, String lessonId) {
@@ -47,6 +44,6 @@ public class LessonService {
         List<String> requiredLessons = lesson.getPrerequisites().getRequiredLessonIds();
 
         return requiredLessons.stream()
-                .allMatch(reqLessonId -> progressService.isLessonCompleted(userId, reqLessonId));
+                .allMatch(reqLessonId -> progressOperations.isLessonCompleted(userId, reqLessonId));
     }
 }

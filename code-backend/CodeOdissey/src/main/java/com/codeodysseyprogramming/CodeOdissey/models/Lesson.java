@@ -15,6 +15,7 @@ public class Lesson {
     @Id
     private String id;
     private String moduleId;
+    private String courseId;
     private String title;
     private String description;
     private String content;

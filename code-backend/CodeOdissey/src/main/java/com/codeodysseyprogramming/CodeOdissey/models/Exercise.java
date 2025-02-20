@@ -14,6 +14,7 @@ public class Exercise {
     private String title;
     private String description;
     private Difficulty difficulty;
+    private String courseId;
     private String language;
     private String starterCode;
     private List<TestCase> testCases;
