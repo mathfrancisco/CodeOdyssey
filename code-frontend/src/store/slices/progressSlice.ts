@@ -97,3 +97,6 @@ export const {
 } = progressSlice.actions;
 
 export default progressSlice.reducer;
+
+export class completeLesson {
+}

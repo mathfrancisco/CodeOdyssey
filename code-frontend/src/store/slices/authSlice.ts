@@ -1,18 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {AuthState, User} from '../../types/user';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  // Add other user properties as needed
-}
-
-interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
-}
 
 const initialState: AuthState = {
   user: null,

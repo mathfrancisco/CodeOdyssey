@@ -1,7 +1,8 @@
 // src/pages/Home.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import coursesService, { Course } from '../services/courses.service';
+import coursesService from '../services/courses.service';
+import { Course } from '../types/courses';
 import { useAppSelector } from '../store/slices/hooks';
 
 const Home = () => {
