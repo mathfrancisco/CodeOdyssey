@@ -61,6 +61,30 @@ const progressSlice = createSlice({
     },
   },
 });
+enrollCourse: (state, action: PayloadAction<string>) => {
+  // Cria um novo progresso para o curso quando o usuário se matricula
+  const courseId = action.payload;
+  
+  // Verifica se o usuário já está matriculado
+  const existingProgress = state.userProgress.find(p => p.courseId === courseId);
+  
+  if (!existingProgress) {
+    // Supondo que temos o userId disponível no state
+    const userId = state.currentProgress?.userId || 'current-user-id';
+    
+    // Cria um novo progresso
+    const newProgress: Progress = {
+      userId,
+      courseId,
+      modulesProgress: [],
+      exercisesCompleted: [],
+      certificateIssued: false
+    };
+    
+    state.userProgress.push(newProgress);
+    state.currentProgress = newProgress;
+  }
+}
 
 export const {
   fetchProgressStart,
