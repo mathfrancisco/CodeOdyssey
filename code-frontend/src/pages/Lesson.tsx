@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import coursesService, { Lesson as LessonType } from '../services/courses.service';
+import coursesService from '../services/courses.service';
 import userService from '../services/user.service';
 import { useAppSelector, useAppDispatch } from '../store/slices/hooks';
-import { completeLesson } from '../store/slices/progressSlice';
+import { updateProgressSuccess } from '../store/slices/progressSlice';
 import { formatDuration } from '../utils/formatters';
+import { Lesson as LessonType } from "../types/courses.ts";
 
 const Lesson: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const [lesson, setLesson] = useState<LessonType | null>(null);
   const [course, setCourse] = useState<{ id: string; title: string } | null>(null);
   const [nextLesson, setNextLesson] = useState<string | null>(null);
@@ -23,38 +24,39 @@ const Lesson: React.FC = () => {
 
   useEffect(() => {
     const fetchLessonData = async () => {
-      if (!id) return;
-      
+      if (!courseId || !lessonId) return;
+
       try {
         setLoading(true);
-        const lessonData = await coursesService.getLessonById(id);
+        // Updated to pass both required parameters
+        const lessonData = await coursesService.getLessonById(courseId, lessonId);
         setLesson(lessonData);
-        
+
         // Get course info
-        const courseData = await coursesService.getCourseById(lessonData.courseId);
+        const courseData = await coursesService.getCourseById(courseId);
         setCourse({
           id: courseData.id,
           title: courseData.title
         });
-        
+
         // Get all lessons from course to determine next/prev
-        const courseLessons = await coursesService.getCourseLessons(lessonData.courseId);
-        const currentIndex = courseLessons.findIndex(lesson => lesson.id === id);
-        
+        const courseLessons = await coursesService.getCourseLessons(courseId);
+        const currentIndex = courseLessons.findIndex((lesson: { id: string; }) => lesson.id === lessonId);
+
         if (currentIndex > 0) {
           setPrevLesson(courseLessons[currentIndex - 1].id);
         }
-        
+
         if (currentIndex < courseLessons.length - 1) {
           setNextLesson(courseLessons[currentIndex + 1].id);
         }
-        
+
         // Check if lesson is completed
         if (user) {
-          const lessonStatus = await userService.checkLessonStatus(id);
+          const lessonStatus = await userService.checkLessonStatus(lessonId);
           setIsCompleted(lessonStatus.isCompleted);
         }
-        
+
         setLoading(false);
       } catch (err) {
         setError('Falha ao carregar a aula. Por favor, tente novamente.');
@@ -63,21 +65,31 @@ const Lesson: React.FC = () => {
     };
 
     fetchLessonData();
-  }, [id, user]);
+  }, [courseId, lessonId, user]);
 
   const handleMarkComplete = async () => {
-    if (!id || !user || isCompleted) return;
-    
+    if (!lessonId || !user || isCompleted) return;
+
     try {
-      await userService.markLessonComplete(id);
+      await userService.markLessonComplete(lessonId);
       setIsCompleted(true);
-      dispatch(completeLesson({ lessonId: id }));
-      
+
+      // Update progress in Redux store using updateProgressSuccess instead of completeLesson
+      if (courseId) {
+        dispatch(updateProgressSuccess({
+          certificateIssued: false, exercisesCompleted: [], modulesProgress: [],
+          userId: user.id,
+          courseId: courseId,
+          lessonId: lessonId,
+          completedAt: new Date().toISOString()
+        }));
+      }
+
       // If there's a next lesson, ask if user wants to continue
       if (nextLesson) {
         const shouldContinue = window.confirm('Aula marcada como concluída! Deseja continuar para a próxima aula?');
         if (shouldContinue) {
-          navigate(`/lessons/${nextLesson}`);
+          navigate(`/courses/${courseId}/lessons/${nextLesson}`);
         }
       }
     } catch (err) {
@@ -215,7 +227,7 @@ const Lesson: React.FC = () => {
               {/* Would be populated by course lessons in a real app */}
               <div className="mt-2 space-y-1">
                 <div className={`flex items-center p-2 rounded-md ${
-                  true ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-50'
+                  'bg-primary-50 text-primary-700'
                 }`}>
                   <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 text-xs">
                     1

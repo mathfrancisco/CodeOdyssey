@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-@Profile("dev")
 public class DevDataInitializer {
 
     @Autowired

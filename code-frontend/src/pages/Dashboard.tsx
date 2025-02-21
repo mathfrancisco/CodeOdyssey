@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '../store/slices/hooks';
-import userService, { UserStats } from '../services/user.service';
-import coursesService, { Course } from '../services/courses.service';
+import userService from '../services/user.service';
+import coursesService from '../services/courses.service';
+import {Course} from '../types/courses';
+import { UserStats} from '../types/user';
 
 const Dashboard: React.FC = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -26,9 +28,9 @@ const Dashboard: React.FC = () => {
         // Fetch recommended courses
         const allCourses = await coursesService.getAllCourses();
         // Filter out courses the user is already enrolled in
-        const enrolledIds = userCourses.map(course => course.id);
+        const enrolledIds = userCourses.map((course: { id: any; }) => course.id);
         const recommended = allCourses
-          .filter(course => !enrolledIds.includes(course.id))
+          .filter((course: { id: any; }) => !enrolledIds.includes(course.id))
           .slice(0, 3);
         setRecommendedCourses(recommended);
 

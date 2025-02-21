@@ -3,6 +3,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface Progress {
   userId: string;
   courseId: string;
+  lessonId?: string;
+  completedAt?: string;
   modulesProgress: any[];
   exercisesCompleted: string[];
   certificateIssued: boolean;
@@ -97,6 +99,3 @@ export const {
 } = progressSlice.actions;
 
 export default progressSlice.reducer;
-
-export class completeLesson {
-}

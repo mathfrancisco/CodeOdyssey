@@ -5,26 +5,35 @@ import { updateUser } from '../store/slices/authSlice';
 import userService from '../services/user.service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBook, faTrophy, faTarget, faFire, faCamera,
-  faGithub, faLinkedin, faTwitter, faGlobe, faEnvelope,
-  faSpinner, faCheck, faTimes, faLock, faGlasses, faBell,
-  faUser, faMoon, faLanguage, faClock
+  faBook, faTrophy, faFire, faCamera,
+  faSpinner, faCheck, faTimes, faLock, faBell,
+  faMoon, faLanguage, faClock
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  faGithub,
+  faLinkedin,
+  faTwitter
+} from '@fortawesome/free-brands-svg-icons';
+import { faGlobe, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import {
   UserProfile,
   UserUpdateData,
   UserStats,
   SocialLink,
   ServiceError,
-  UserPreferences
+  UserPreferences,
 } from '../types/user';
 import { formatDate } from '../utils/formatters';
 
+
+
+
 const ProfilePage: React.FC = () => {
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  // Rest of the component remains the same, but with typed state
   const [profile, setProfile] = useState<UserProfile>({
     id: '',
     name: '',

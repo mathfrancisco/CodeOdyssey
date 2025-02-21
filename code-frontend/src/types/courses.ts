@@ -1,4 +1,5 @@
 export interface Course {
+  progress: string;
   requirements: string[];
   goals: string[];
   id: string;
@@ -22,6 +23,9 @@ export interface Module {
 }
 
 export interface Lesson {
+  description: any;
+  progress: string;
+  lessonId: string;
   id: string;
   title: string;
   content: string;
