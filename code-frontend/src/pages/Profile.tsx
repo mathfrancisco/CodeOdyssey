@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBook, faTrophy, faFire, faCamera,
   faSpinner, faCheck, faTimes, faLock, faBell,
-  faMoon, faLanguage, faClock
+  faMoon, faLanguage, faClock, faTarget
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faGithub,
@@ -17,7 +17,7 @@ import {
 import { faGlobe, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import {
   UserProfile,
-  UserUpdateData,
+  UserUpdateRequest,
   UserStats,
   SocialLink,
   ServiceError,
@@ -25,15 +25,12 @@ import {
 } from '../types/user';
 import { formatDate } from '../utils/formatters';
 
-
-
-
 const ProfilePage: React.FC = () => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  // Rest of the component remains the same, but with typed state
+  // State initialization with proper typing
   const [profile, setProfile] = useState<UserProfile>({
     id: '',
     name: '',
@@ -109,13 +106,12 @@ const ProfilePage: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, profile: true, stats: true }));
 
-      const [profileData, progressData] = await Promise.all([
-        userService.getUserProfile(),
-        userService.getUserProgress()
-      ]);
-
+      // Using the appropriate service methods
+      const profileData = await userService.getUserProfile();
+      const statsData = await userService.getUserStats();
+      
       setProfile(profileData);
-      setStats(progressData.stats);
+      setStats(statsData);
     } catch (error) {
       const serviceError = error as ServiceError;
       setErrors(prev => ({
@@ -133,18 +129,19 @@ const ProfilePage: React.FC = () => {
       setLoading(prev => ({ ...prev, profile: true }));
       setErrors({});
 
-      const updateData: UserUpdateData = {
+      // Create proper update request
+      const updateData: UserUpdateRequest = new UserUpdateRequest({
         name: profile.name,
         profile: {
           bio: profile.profile.bio,
           avatar: profile.profile.avatar,
           socialLinks: profile.profile.socialLinks
-        },
-        preferences: profile.preferences
-      };
+        }
+      });
 
       await userService.updateUserProfile(updateData);
 
+      // Update user in Redux store
       dispatch(updateUser({
         name: profile.name,
         avatar: profile.profile.avatar
@@ -182,7 +179,8 @@ const ProfilePage: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, password: true }));
 
-      await userService.updatePassword(password.current, password.new);
+      // Fixed to match your service method signature
+      await userService.updatePassword(password.current);
 
       setSuccess(prev => ({
         ...prev,
@@ -211,9 +209,10 @@ const ProfilePage: React.FC = () => {
       setLoading(prev => ({ ...prev, profile: true }));
       setErrors({});
 
-      const updateData: UserUpdateData = {
+      // Create proper update request for preferences only
+      const updateData: UserUpdateRequest = new UserUpdateRequest({
         preferences: profile.preferences
-      };
+      });
 
       await userService.updateUserProfile(updateData);
 
@@ -243,10 +242,11 @@ const ProfilePage: React.FC = () => {
     try {
       setLoading(prev => ({ ...prev, avatar: true }));
 
-      // Here you would typically upload the file to your server
-      // Mock API call for demo purposes
+      // In a real implementation, you would upload the file to your server
+      // This is a simplified example
       const avatarUrl = URL.createObjectURL(file);
 
+      // Update local state
       setProfile(prev => ({
         ...prev,
         profile: {
@@ -255,11 +255,20 @@ const ProfilePage: React.FC = () => {
         }
       }));
 
+      // Create proper update request for avatar
+      const updateData: UserUpdateRequest = new UserUpdateRequest({
+        profile: {
+          avatar: avatarUrl
+        }
+      });
+
+      // Update on server
+      await userService.updateUserProfile(updateData);
+
       // Update in Redux store
       dispatch(updateUser({
         avatar: avatarUrl
       }));
-
     } catch (error) {
       const serviceError = error as ServiceError;
       setErrors(prev => ({
@@ -318,596 +327,596 @@ const ProfilePage: React.FC = () => {
 
   if (loading.profile && !profile.id) {
     return (
-        <div className="flex justify-center items-center h-screen">
-          <FontAwesomeIcon icon={faSpinner} className="h-8 w-8 text-blue-600 animate-spin" />
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <FontAwesomeIcon icon={faSpinner} className="h-8 w-8 text-blue-600 animate-spin" />
+      </div>
     );
   }
 
   return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Meu Perfil</h1>
-              <p className="text-gray-600">Gerencie suas informações e preferências</p>
-              <p className="text-sm text-gray-500 mt-1">
-                Membro desde {formatDate(profile.createdAt)}
-              </p>
-            </div>
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Meu Perfil</h1>
+            <p className="text-gray-600">Gerencie suas informações e preferências</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Membro desde {formatDate(profile.createdAt)}
+            </p>
+          </div>
 
-            <div className="relative group">
-              <div className="h-24 w-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200">
-                {profile.profile.avatar ? (
-                    <img
-                        src={profile.profile.avatar}
-                        alt={profile.name}
-                        className="h-full w-full object-cover"
-                    />
-                ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-blue-600 text-white text-xl">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </div>
-                )}
-              </div>
-
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <label className="cursor-pointer flex items-center justify-center w-full h-full">
-                  <FontAwesomeIcon icon={faCamera} className="h-6 w-6 text-white" />
-                  <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleAvatarUpdate}
-                  />
-                </label>
-              </div>
-
-              {loading.avatar && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full">
-                    <FontAwesomeIcon icon={faSpinner} className="h-6 w-6 text-white animate-spin" />
-                  </div>
+          <div className="relative group">
+            <div className="h-24 w-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200">
+              {profile.profile.avatar ? (
+                <img
+                  src={profile.profile.avatar}
+                  alt={profile.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-blue-600 text-white text-xl">
+                  {profile.name.charAt(0).toUpperCase()}
+                </div>
               )}
             </div>
+
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              <label className="cursor-pointer flex items-center justify-center w-full h-full">
+                <FontAwesomeIcon icon={faCamera} className="h-6 w-6 text-white" />
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarUpdate}
+                />
+              </label>
+            </div>
+
+            {loading.avatar && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full">
+                <FontAwesomeIcon icon={faSpinner} className="h-6 w-6 text-white animate-spin" />
+              </div>
+            )}
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faBook} className="h-8 w-8 text-blue-600 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-600">Cursos Matriculados</p>
-                  <p className="text-2xl font-bold">{stats.coursesEnrolled}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faTrophy} className="h-8 w-8 text-blue-600 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-600">Cursos Completados</p>
-                  <p className="text-2xl font-bold">{stats.coursesCompleted}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faTarget} className="h-8 w-8 text-blue-600 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-600">Pontuação Total</p>
-                  <p className="text-2xl font-bold">{stats.totalPoints}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faFire} className="h-8 w-8 text-blue-600 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-600">Sequência Atual</p>
-                  <p className="text-2xl font-bold">{stats.streak} dias</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {errors.general && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">{errors.general}</p>
-                  </div>
-                </div>
-              </div>
-          )}
-
-          {/* Tabs */}
-          <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex">
-                <button
-                    onClick={() => setActiveTab('profile')}
-                    className={`py-2 px-4 text-center w-1/3 sm:w-auto border-b-2 font-medium text-sm ${
-                        activeTab === 'profile'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  Perfil
-                </button>
-                <button
-                    onClick={() => setActiveTab('security')}
-                    className={`py-2 px-4 text-center w-1/3 sm:w-auto border-b-2 font-medium text-sm ${
-                        activeTab === 'security'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  Segurança
-                </button>
-                <button
-                    onClick={() => setActiveTab('preferences')}
-                    className={`py-2 px-4 text-center w-1/3 sm:w-auto border-b-2 font-medium text-sm ${
-                        activeTab === 'preferences'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  Preferências
-                </button>
-              </nav>
-            </div>
-          </div>
-
-          {/* Profile Tab Content */}
-          {activeTab === 'profile' && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-xl font-semibold">Informações do Perfil</h2>
-                </div>
-                <div className="p-6">
-                  <form onSubmit={handleProfileUpdate} className="space-y-4">
-                    {errors.profile && (
-                        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-red-700">{errors.profile}</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    {success.profile && (
-                        <div className="bg-green-50 border-l-4 border-green-500 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-green-700">{success.profile}</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Nome</label>
-                      <input
-                          value={profile.name}
-                          onChange={(e) => setProfile(prev => ({
-                            ...prev,
-                            name: e.target.value
-                          }))}
-                          placeholder="Seu nome completo"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
-                      <input
-                          value={profile.email}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Para alterar seu email, entre em contato com o suporte.
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Biografia</label>
-                      <textarea
-                          value={profile.profile.bio}
-                          onChange={(e) => setProfile(prev => ({
-                            ...prev,
-                            profile: {
-                              ...prev.profile,
-                              bio: e.target.value
-                            }
-                          }))}
-                          rows={4}
-                          placeholder="Conte um pouco sobre você, suas experiências e interesses..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Links Sociais</label>
-                      <div className="space-y-2">
-                        {profile.profile.socialLinks?.map((link, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                              <div className="flex items-center gap-2 bg-gray-50 rounded-l-md px-3 py-2 border border-r-0 border-gray-300">
-                                <FontAwesomeIcon icon={getSocialIcon(link.type)} className="h-4 w-4" />
-                                <span className="text-sm font-medium">{link.type}</span>
-                              </div>
-                              <input
-                                  value={link.url}
-                                  disabled
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-none rounded-r-md shadow-sm bg-gray-50"
-                              />
-                              <button
-                                  type="button"
-                                  className="px-3 py-2 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                  onClick={() => handleSocialLinkRemove(index)}
-                              >
-                                Remover
-                              </button>
-                            </div>
-                        ))}
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                          <input
-                              placeholder="Tipo (ex: LinkedIn)"
-                              value={newSocialLink.type}
-                              onChange={(e) => setNewSocialLink(prev => ({
-                                ...prev,
-                                type: e.target.value
-                              }))}
-                              className="sm:max-w-[200px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          />
-                          <input
-                              placeholder="URL"
-                              value={newSocialLink.url}
-                              onChange={(e) => setNewSocialLink(prev => ({
-                                ...prev,
-                                url: e.target.value
-                              }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          />
-                          <button
-                              type="button"
-                              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                              onClick={handleSocialLinkAdd}
-                              disabled={!newSocialLink.type || !newSocialLink.url}
-                          >
-                            Adicionar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                          type="submit"
-                          disabled={loading.profile}
-                          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                      >
-                        {loading.profile ? (
-                            <>
-                              <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
-                              Salvando...
-                            </>
-                        ) : (
-                            'Salvar Alterações'
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-          )}
-
-          {/* Security Tab Content */}
-          {activeTab === 'security' && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-xl font-semibold">Alterar Senha</h2>
-                </div>
-                <div className="p-6">
-                  <form onSubmit={handlePasswordUpdate} className="space-y-4">
-                    {errors.password && (
-                        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-red-700">{errors.password}</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    {success.password && (
-                        <div className="bg-green-50 border-l-4 border-green-500 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-green-700">{success.password}</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Senha Atual</label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FontAwesomeIcon icon={faLock} className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                            type="password"
-                            value={password.current}
-                            onChange={(e) => setPassword(prev => ({
-                              ...prev,
-                              current: e.target.value
-                            }))}
-                            placeholder="Digite sua senha atual"
-                            className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Nova Senha</label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FontAwesomeIcon icon={faLock} className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                            type="password"
-                            value={password.new}
-                            onChange={(e) => setPassword(prev => ({
-                              ...prev,
-                              new: e.target.value
-                            }))}
-                            placeholder="Digite sua nova senha"
-                            className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Confirmar Nova Senha</label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FontAwesomeIcon icon={faLock} className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                            type="password"
-                            value={password.confirm}
-                            onChange={(e) => setPassword(prev => ({
-                              ...prev,
-                              confirm: e.target.value
-                            }))}
-                            placeholder="Confirme sua nova senha"
-                            className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pt-2">
-                      <p className="text-sm text-gray-600 mb-4">Sua senha deve conter:</p>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        <li className={`flex items-center ${password.new.length >= 8 ? 'text-green-600' : ''}`}>
-                          <div className={`w-2 h-2 rounded-full mr-2 ${password.new.length >= 8 ? 'bg-green-600' : 'bg-gray-400'}`}></div>
-                          No mínimo 8 caracteres
-                        </li>
-                        <li className={`flex items-center ${/[A-Z]/.test(password.new) ? 'text-green-600' : ''}`}>
-                          <div className={`w-2 h-2 rounded-full mr-2 ${/[A-Z]/.test(password.new) ? 'bg-green-600' : 'bg-gray-400'}`}></div>
-                          Uma letra maiúscula
-                        </li>
-                        <li className={`flex items-center ${/[0-9]/.test(password.new) ? 'text-green-600' : ''}`}>
-                          <div className={`w-2 h-2 rounded-full mr-2 ${/[0-9]/.test(password.new) ? 'bg-green-600' : 'bg-gray-400'}`}></div>
-                          Um número
-                        </li>
-                        <li className={`flex items-center ${/[^A-Za-z0-9]/.test(password.new) ? 'text-green-600' : ''}`}>
-                          <div className={`w-2 h-2 rounded-full mr-2 ${/[^A-Za-z0-9]/.test(password.new) ? 'bg-green-600' : 'bg-gray-400'}`}></div>
-                          Um caractere especial
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                          type="submit"
-                          disabled={loading.password ||
-                              !password.current ||
-                              !password.new ||
-                              !password.confirm ||
-                              password.new !== password.confirm}
-                          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                      >
-                        {loading.password ? (
-                            <>
-                              <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
-                              Atualizando...
-                            </>
-                        ) : (
-                            'Atualizar Senha'
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-          )}
-
-          {/* Preferences Tab Content */}
-          {activeTab === 'preferences' && (
-              <div className="bg-white rounded-lg shadow">
-                <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-xl font-semibold">Preferências</h2>
-                </div>
-                <div className="p-6">
-                  <form onSubmit={handlePreferencesUpdate} className="space-y-6">
-                    {errors.preferences && (
-                        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-red-700">{errors.preferences}</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    {success.preferences && (
-                        <div className="bg-green-50 border-l-4 border-green-500 p-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-green-700">{success.preferences}</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Notificações</h3>
-                      <div className="flex items-start">
-                        <div className="flex items-center h-5">
-                          <input
-                              id="emailNotifications"
-                              name="emailNotifications"
-                              type="checkbox"
-                              checked={profile.preferences.emailNotifications}
-                              onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                        </div>
-                        <div className="ml-3">
-                          <label htmlFor="emailNotifications" className="text-sm font-medium text-gray-700">
-                            <div className="flex items-center">
-                              <FontAwesomeIcon icon={faBell} className="h-4 w-4 mr-2 text-gray-500" />
-                              Notificações por email
-                            </div>
-                          </label>
-                          <p className="text-sm text-gray-500">
-                            Receba atualizações sobre cursos, novos conteúdos e lembretes de estudo.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Aparência</h3>
-                      <div className="flex items-start">
-                        <div className="flex items-center h-5">
-                          <input
-                              id="darkMode"
-                              name="darkMode"
-                              type="checkbox"
-                              checked={profile.preferences.darkMode}
-                              onChange={(e) => handlePreferenceChange('darkMode', e.target.checked)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                        </div>
-                        <div className="ml-3">
-                          <label htmlFor="darkMode" className="text-sm font-medium text-gray-700">
-                            <div className="flex items-center">
-                              <FontAwesomeIcon icon={faMoon} className="h-4 w-4 mr-2 text-gray-500" />
-                              Modo escuro
-                            </div>
-                          </label>
-                          <p className="text-sm text-gray-500">
-                            Utilize um tema escuro para reduzir o cansaço visual em ambientes de pouca luz.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Idioma e Região</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">
-                            <div className="flex items-center">
-                              <FontAwesomeIcon icon={faLanguage} className="h-4 w-4 mr-2 text-gray-500" />
-                              Idioma
-                            </div>
-                          </label>
-                          <select
-                              value={profile.preferences.language}
-                              onChange={(e) => handlePreferenceChange('language', e.target.value)}
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                          >
-                            <option value="pt-BR">Português (Brasil)</option>
-                            <option value="en-US">English (US)</option>
-                            <option value="es-ES">Español</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">
-                            <div className="flex items-center">
-                              <FontAwesomeIcon icon={faClock} className="h-4 w-4 mr-2 text-gray-500" />
-                              Fuso horário
-                            </div>
-                          </label>
-                          <select
-                              value={profile.preferences.timezone}
-                              onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                          >
-                            <option value="America/Sao_Paulo">América/São Paulo</option>
-                            <option value="America/New_York">América/Nova York</option>
-                            <option value="Europe/London">Europa/Londres</option>
-                            <option value="Asia/Tokyo">Ásia/Tóquio</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 flex justify-end">
-                      <button
-                          type="submit"
-                          disabled={loading.profile}
-                          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                      >
-                        {loading.profile ? (
-                            <>
-                              <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
-                              Salvando...
-                            </>
-                        ) : (
-                            'Salvar Preferências'
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-          )}
         </div>
-      </div>
-  );
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faBook} className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="text-sm text-gray-600">Cursos Matriculados</p>
+                <p className="text-2xl font-bold">{stats.coursesEnrolled}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faTrophy} className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="text-sm text-gray-600">Cursos Completados</p>
+                <p className="text-2xl font-bold">{stats.coursesCompleted}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faTarget} className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="text-sm text-gray-600">Pontuação Total</p>
+                <p className="text-2xl font-bold">{stats.totalPoints}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faFire} className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="text-sm text-gray-600">Sequência Atual</p>
+                <p className="text-2xl font-bold">{stats.streak} dias</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {errors.general && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{errors.general}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`py-2 px-4 text-center w-1/3 sm:w-auto border-b-2 font-medium text-sm ${
+                  activeTab === 'profile'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Perfil
+              </button>
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`py-2 px-4 text-center w-1/3 sm:w-auto border-b-2 font-medium text-sm ${
+                  activeTab === 'security'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Segurança
+              </button>
+              <button
+                onClick={() => setActiveTab('preferences')}
+                className={`py-2 px-4 text-center w-1/3 sm:w-auto border-b-2 font-medium text-sm ${
+                  activeTab === 'preferences'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Preferências
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Profile Tab Content */}
+        {activeTab === 'profile' && (
+          <div className="bg-white rounded-lg shadow">
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h2 className="text-xl font-semibold">Informações do Perfil</h2>
+            </div>
+            <div className="p-6">
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
+                {errors.profile && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-red-700">{errors.profile}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {success.profile && (
+                  <div className="bg-green-50 border-l-4 border-green-500 p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-green-700">{success.profile}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Nome</label>
+                  <input
+                    value={profile.name}
+                    onChange={(e) => setProfile(prev => ({
+                      ...prev,
+                      name: e.target.value
+                    }))}
+                    placeholder="Seu nome completo"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    value={profile.email}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Para alterar seu email, entre em contato com o suporte.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Biografia</label>
+                  <textarea
+                    value={profile.profile.bio}
+                    onChange={(e) => setProfile(prev => ({
+                      ...prev,
+                      profile: {
+                        ...prev.profile,
+                        bio: e.target.value
+                      }
+                    }))}
+                    rows={4}
+                    placeholder="Conte um pouco sobre você, suas experiências e interesses..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Links Sociais</label>
+                  <div className="space-y-2">
+                    {profile.profile.socialLinks?.map((link, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 bg-gray-50 rounded-l-md px-3 py-2 border border-r-0 border-gray-300">
+                          <FontAwesomeIcon icon={getSocialIcon(link.type)} className="h-4 w-4" />
+                          <span className="text-sm font-medium">{link.type}</span>
+                        </div>
+                        <input
+                          value={link.url}
+                          disabled
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-none rounded-r-md shadow-sm bg-gray-50"
+                        />
+                        <button
+                          type="button"
+                          className="px-3 py-2 bg-red-600 text-white rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          onClick={() => handleSocialLinkRemove(index)}
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    ))}
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <input
+                        placeholder="Tipo (ex: LinkedIn)"
+                        value={newSocialLink.type}
+                        onChange={(e) => setNewSocialLink(prev => ({
+                          ...prev,
+                          type: e.target.value
+                        }))}
+                        className="sm:max-w-[200px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <input
+                        placeholder="URL"
+                        value={newSocialLink.url}
+                        onChange={(e) => setNewSocialLink(prev => ({
+                          ...prev,
+                          url: e.target.value
+                        }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <button
+                        type="button"
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        onClick={handleSocialLinkAdd}
+                        disabled={!newSocialLink.type || !newSocialLink.url}
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={loading.profile}
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {loading.profile ? (
+                      <>
+                        <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      'Salvar Alterações'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Security Tab Content */}
+       {activeTab === 'security' && (
+  <div className="bg-white rounded-lg shadow">
+    <div className="border-b border-gray-200 px-6 py-4">
+      <h2 className="text-xl font-semibold">Alterar Senha</h2>
+    </div>
+    <div className="p-6">
+      <form onSubmit={handlePasswordUpdate} className="space-y-4">
+        {errors.password && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{errors.password}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {success.password && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700">{success.password}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Senha Atual</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FontAwesomeIcon icon={faLock} className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="password"
+              value={password.current}
+              onChange={(e) => setPassword(prev => ({
+                ...prev,
+                current: e.target.value
+              }))}
+              placeholder="Digite sua senha atual"
+              className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Nova Senha</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FontAwesomeIcon icon={faLock} className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="password"
+              value={password.new}
+              onChange={(e) => setPassword(prev => ({
+                ...prev,
+                new: e.target.value
+              }))}
+              placeholder="Digite sua nova senha"
+              className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Confirmar Nova Senha</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FontAwesomeIcon icon={faLock} className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="password"
+              value={password.confirm}
+              onChange={(e) => setPassword(prev => ({
+                ...prev,
+                confirm: e.target.value
+              }))}
+              placeholder="Confirme sua nova senha"
+              className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <p className="text-sm text-gray-600 mb-4">Sua senha deve conter:</p>
+          <ul className="space-y-1 text-sm text-gray-600">
+            <li className={`flex items-center ${password.new.length >= 8 ? 'text-green-600' : ''}`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${password.new.length >= 8 ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+              No mínimo 8 caracteres
+            </li>
+            <li className={`flex items-center ${/[A-Z]/.test(password.new) ? 'text-green-600' : ''}`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${/[A-Z]/.test(password.new) ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+              Uma letra maiúscula
+            </li>
+            <li className={`flex items-center ${/[0-9]/.test(password.new) ? 'text-green-600' : ''}`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${/[0-9]/.test(password.new) ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+              Um número
+            </li>
+            <li className={`flex items-center ${/[^A-Za-z0-9]/.test(password.new) ? 'text-green-600' : ''}`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${/[^A-Za-z0-9]/.test(password.new) ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+              Um caractere especial
+            </li>
+          </ul>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading.password ||
+              !password.current ||
+              !password.new ||
+              !password.confirm ||
+              password.new !== password.confirm ||
+              password.new.length < 8 ||
+              !/[A-Z]/.test(password.new) ||
+              !/[0-9]/.test(password.new) ||
+              !/[^A-Za-z0-9]/.test(password.new)}
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            {loading.password ? (
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
+                Atualizando...
+              </>
+            ) : (
+              'Atualizar Senha'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
+{/* Preferences Tab Content */}
+{activeTab === 'preferences' && (
+  <div className="bg-white rounded-lg shadow">
+    <div className="border-b border-gray-200 px-6 py-4">
+      <h2 className="text-xl font-semibold">Preferências</h2>
+    </div>
+    <div className="p-6">
+      <form onSubmit={handlePreferencesUpdate} className="space-y-6">
+        {errors.preferences && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{errors.preferences}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {success.preferences && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700">{success.preferences}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Notificações</h3>
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="email-notifications"
+                  type="checkbox"
+                  checked={profile.preferences.emailNotifications}
+                  onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
+                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="email-notifications" className="font-medium text-gray-700">
+                  Notificações por email
+                </label>
+                <p className="text-gray-500">
+                  Receba atualizações sobre cursos, novos conteúdos e lembretes por email.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Aparência</h3>
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="dark-mode"
+                  type="checkbox"
+                  checked={profile.preferences.darkMode}
+                  onChange={(e) => handlePreferenceChange('darkMode', e.target.checked)}
+                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="dark-mode" className="font-medium text-gray-700 flex items-center">
+                  <FontAwesomeIcon icon={faMoon} className="mr-2 h-4 w-4" />
+                  Modo escuro
+                </label>
+                <p className="text-gray-500">
+                  Utilizar tema escuro na plataforma para conforto visual.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Idioma e Região</h3>
+          <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+            <div className="space-y-1">
+              <label htmlFor="language" className="text-sm font-medium text-gray-700 flex items-center">
+                <FontAwesomeIcon icon={faLanguage} className="mr-2 h-4 w-4" />
+                Idioma
+              </label>
+              <select
+                id="language"
+                value={profile.preferences.language}
+                onChange={(e) => handlePreferenceChange('language', e.target.value)}
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="en-US">English (United States)</option>
+                <option value="es-ES">Español</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="timezone" className="text-sm font-medium text-gray-700 flex items-center">
+                <FontAwesomeIcon icon={faClock} className="mr-2 h-4 w-4" />
+                Fuso Horário
+              </label>
+              <select
+                id="timezone"
+                value={profile.preferences.timezone}
+                onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="America/Sao_Paulo">America/Sao_Paulo (GMT-3)</option>
+                <option value="America/New_York">America/New_York (GMT-5/GMT-4)</option>
+                <option value="Europe/London">Europe/London (GMT+0/GMT+1)</option>
+                <option value="Asia/Tokyo">Asia/Tokyo (GMT+9)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading.profile}
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            {loading.profile ? (
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Salvar Preferências'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
+{/* Fechamento da div principal e do componente */}
+</div>
+</div>
 };
 
 export default ProfilePage;
