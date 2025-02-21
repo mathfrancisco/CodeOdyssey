@@ -123,7 +123,7 @@ const Register: React.FC = () => {
       placeholder: string = ''
   ) => (
       <div>
-        <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+        <label htmlFor={name} className="block text-sm font-semibold text-white/90 mb-1.5">
           {label}
         </label>
         <input
@@ -132,36 +132,61 @@ const Register: React.FC = () => {
             type={type}
             autoComplete={name}
             required
-            className={`mt-1 appearance-none block w-full px-3 py-2 border ${
-                errors[name] ? 'border-red-300' : 'border-gray-300'
-            } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm`}
+            className={`w-full px-4 py-3 rounded-lg bg-white/10 backdrop-blur-sm border ${
+                errors[name] ? 'border-red-400' : 'border-white/20'
+            } text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20 transition-all duration-300`}
             placeholder={placeholder}
             value={formData[name].toString()}
             onChange={handleInputChange}
         />
         {errors[name] && (
-            <p className="mt-1 text-sm text-red-600">{errors[name]}</p>
+            <p className="mt-2 text-sm text-red-400">{errors[name]}</p>
         )}
       </div>
   );
 
   return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 py-12 px-4 sm:px-6 lg:px-8">
+        {/* Abstract decorative element */}
+        <div className="hidden md:block absolute right-0 top-0 transform -translate-y-1/4 opacity-20">
+          <svg
+              width="404"
+              height="404"
+              fill="none"
+              viewBox="0 0 404 404"
+              aria-hidden="true"
+          >
+            <defs>
+              <pattern
+                  id="grid-pattern"
+                  x="0"
+                  y="0"
+                  width="20"
+                  height="20"
+                  patternUnits="userSpaceOnUse"
+              >
+                <rect x="0" y="0" width="4" height="4" fill="currentColor" className="text-white" />
+              </pattern>
+            </defs>
+            <rect width="404" height="404" fill="url(#grid-pattern)" />
+          </svg>
+        </div>
+
+        <div className="max-w-md w-full space-y-8 relative">
           <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="text-4xl font-extrabold text-center text-white">
               Crie sua conta
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="mt-3 text-center text-lg text-white/80">
               Ou{' '}
-              <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+              <Link to="/login" className="font-medium text-white hover:text-white/90 underline decoration-2 underline-offset-2 transition-all duration-300">
                 faça login se já tiver uma conta
               </Link>
             </p>
           </div>
 
           {errors.submit && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-lg bg-red-400/10 backdrop-blur-sm border border-red-400/20 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg
@@ -178,14 +203,14 @@ const Register: React.FC = () => {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{errors.submit}</h3>
+                    <h3 className="text-sm font-medium text-red-400">{errors.submit}</h3>
                   </div>
                 </div>
               </div>
           )}
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
-            <div className="rounded-md shadow-sm space-y-4">
+          <form className="mt-8 space-y-6 bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/20" onSubmit={handleSubmit} noValidate>
+            <div className="space-y-5">
               {renderField('name', 'Nome completo', 'text', 'Seu nome completo')}
               {renderField('email', 'Email', 'email', 'seu@email.com')}
               {renderField('password', 'Senha', 'password', 'Senha')}
@@ -196,23 +221,23 @@ const Register: React.FC = () => {
                     id="agreeToTerms"
                     name="agreeToTerms"
                     type="checkbox"
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    className="h-5 w-5 rounded border-white/20 bg-white/10 text-indigo-500 focus:ring-2 focus:ring-white/20 focus:ring-offset-0"
                     checked={formData.agreeToTerms}
                     onChange={handleInputChange}
                 />
-                <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="agreeToTerms" className="ml-3 block text-sm text-white/80">
                   Eu concordo com os{' '}
-                  <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
+                  <a href="#" className="font-medium text-white hover:text-white/90 underline decoration-2 underline-offset-2">
                     Termos de Serviço
                   </a>{' '}
                   e{' '}
-                  <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
+                  <a href="#" className="font-medium text-white hover:text-white/90 underline decoration-2 underline-offset-2">
                     Política de Privacidade
                   </a>
                 </label>
               </div>
               {errors.agreeToTerms && (
-                  <p className="mt-1 text-sm text-red-600">{errors.agreeToTerms}</p>
+                  <p className="mt-2 text-sm text-red-400">{errors.agreeToTerms}</p>
               )}
             </div>
 
@@ -220,16 +245,16 @@ const Register: React.FC = () => {
               <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-md font-medium rounded-lg text-indigo-700 bg-white shadow-lg shadow-indigo-500/20 hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/60 disabled:opacity-50 transition-all duration-300"
               >
                 {isSubmitting ? (
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 ) : (
                     <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <svg className="h-5 w-5 text-primary-500 group-hover:text-primary-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-indigo-600 group-hover:text-indigo-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 </span>
