@@ -6,15 +6,14 @@ import userService from '../services/user.service';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBook, faTrophy, faFire, faCamera,
-  faSpinner, faCheck, faTimes, faLock, faBell,
-  faMoon, faLanguage, faClock, faTarget
+  faSpinner, faCheck, faTimes, faLock, faMoon, faLanguage, faClock
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faGithub,
   faLinkedin,
   faTwitter
 } from '@fortawesome/free-brands-svg-icons';
-import { faGlobe, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faGlobe, faEnvelope, faTablet } from '@fortawesome/free-solid-svg-icons';
 import {
   UserProfile,
   UserUpdateRequest,
@@ -23,14 +22,24 @@ import {
   ServiceError,
   UserPreferences,
 } from '../types/user';
-import { formatDate } from '../utils/formatters';
+
+// Fix 1: Change formatDate from a class to a function
+const formatDate = (dateString: string): string => {
+  if (!dateString) return 'N/A';
+
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const ProfilePage: React.FC = () => {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  // State initialization with proper typing
+  // Fix 2: Ensure preferences is initialized properly
   const [profile, setProfile] = useState<UserProfile>({
     id: '',
     name: '',
@@ -109,8 +118,17 @@ const ProfilePage: React.FC = () => {
       // Using the appropriate service methods
       const profileData = await userService.getUserProfile();
       const statsData = await userService.getUserStats();
-      
-      setProfile(profileData);
+
+      // Fix 3: Ensure preferences exists in the returned data
+      setProfile({
+        ...profileData,
+        preferences: profileData.preferences || {
+          emailNotifications: true,
+          darkMode: false,
+          language: 'pt-BR',
+          timezone: 'America/Sao_Paulo'
+        }
+      });
       setStats(statsData);
     } catch (error) {
       const serviceError = error as ServiceError;
@@ -130,7 +148,7 @@ const ProfilePage: React.FC = () => {
       setErrors({});
 
       // Create proper update request
-      const updateData: UserUpdateRequest = new UserUpdateRequest({
+      const updateData = new UserUpdateRequest({
         name: profile.name,
         profile: {
           bio: profile.profile.bio,
@@ -210,7 +228,7 @@ const ProfilePage: React.FC = () => {
       setErrors({});
 
       // Create proper update request for preferences only
-      const updateData: UserUpdateRequest = new UserUpdateRequest({
+      const updateData = new UserUpdateRequest({
         preferences: profile.preferences
       });
 
@@ -256,7 +274,7 @@ const ProfilePage: React.FC = () => {
       }));
 
       // Create proper update request for avatar
-      const updateData: UserUpdateRequest = new UserUpdateRequest({
+      const updateData = new UserUpdateRequest({
         profile: {
           avatar: avatarUrl
         }
@@ -315,11 +333,12 @@ const ProfilePage: React.FC = () => {
     return faGlobe;
   };
 
+  // Fix 4: Added type annotation to ensure type safety
   const handlePreferenceChange = (key: keyof UserPreferences, value: any) => {
     setProfile(prev => ({
       ...prev,
       preferences: {
-        ...prev.preferences,
+        ...(prev.preferences || {}),
         [key]: value
       }
     }));
@@ -327,11 +346,12 @@ const ProfilePage: React.FC = () => {
 
   if (loading.profile && !profile.id) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <FontAwesomeIcon icon={faSpinner} className="h-8 w-8 text-blue-600 animate-spin" />
-      </div>
+        <div className="flex justify-center items-center h-screen">
+          <FontAwesomeIcon icon={faSpinner} className="h-8 w-8 text-blue-600 animate-spin" />
+        </div>
     );
   }
+
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -404,7 +424,7 @@ const ProfilePage: React.FC = () => {
 
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center">
-              <FontAwesomeIcon icon={faTarget} className="h-8 w-8 text-blue-600 mr-3" />
+              <FontAwesomeIcon icon={faTablet} className="h-8 w-8 text-blue-600 mr-3" />
               <div>
                 <p className="text-sm text-gray-600">Pontuação Total</p>
                 <p className="text-2xl font-bold">{stats.totalPoints}</p>
@@ -769,154 +789,155 @@ const ProfilePage: React.FC = () => {
 )}
 
 {/* Preferences Tab Content */}
-{activeTab === 'preferences' && (
-  <div className="bg-white rounded-lg shadow">
-    <div className="border-b border-gray-200 px-6 py-4">
-      <h2 className="text-xl font-semibold">Preferências</h2>
-    </div>
-    <div className="p-6">
-      <form onSubmit={handlePreferencesUpdate} className="space-y-6">
-        {errors.preferences && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
+        {activeTab === 'preferences' && (
+            <div className="bg-white rounded-lg shadow">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 className="text-xl font-semibold">Preferências</h2>
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{errors.preferences}</p>
+              <div className="p-6">
+                <form onSubmit={handlePreferencesUpdate} className="space-y-4">
+                  {errors.preferences && (
+                      <div className="bg-red-50 border-l-4 border-red-500 p-4">
+                        <div className="flex">
+                          <div className="flex-shrink-0">
+                            <FontAwesomeIcon icon={faTimes} className="h-5 w-5 text-red-500" />
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-sm text-red-700">{errors.preferences}</p>
+                          </div>
+                        </div>
+                      </div>
+                  )}
+
+                  {success.preferences && (
+                      <div className="bg-green-50 border-l-4 border-green-500 p-4">
+                        <div className="flex">
+                          <div className="flex-shrink-0">
+                            <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-sm text-green-700">{success.preferences}</p>
+                          </div>
+                        </div>
+                      </div>
+                  )}
+
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-medium mb-2">Notificações</h3>
+                      <div className="bg-gray-50 p-4 rounded-md">
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                                id="email-notifications"
+                                type="checkbox"
+                                checked={profile.preferences?.emailNotifications ?? true}
+                                onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
+                                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="email-notifications" className="font-medium text-gray-700">
+                              Notificações por email
+                            </label>
+                            <p className="text-gray-500">
+                              Receba emails sobre novos conteúdos, atualizações e lembretes de estudo
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium mb-2">Aparência</h3>
+                      <div className="bg-gray-50 p-4 rounded-md">
+                        <div className="flex items-start">
+                          <div className="flex items-center h-5">
+                            <input
+                                id="dark-mode"
+                                type="checkbox"
+                                checked={profile.preferences?.darkMode ?? false}
+                                onChange={(e) => handlePreferenceChange('darkMode', e.target.checked)}
+                                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                          </div>
+                          <div className="ml-3 text-sm">
+                            <label htmlFor="dark-mode" className="font-medium text-gray-700 flex items-center">
+                              <FontAwesomeIcon icon={faMoon} className="h-4 w-4 mr-1" />
+                              Modo escuro
+                            </label>
+                            <p className="text-gray-500">
+                              Ativar tema escuro para reduzir o cansaço visual
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium mb-2">Idioma e Região</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <FontAwesomeIcon icon={faLanguage} className="h-4 w-4 mr-1" />
+                            Idioma
+                          </label>
+                          <select
+                              value={profile.preferences?.language ?? 'pt-BR'}
+                              onChange={(e) => handlePreferenceChange('language', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="pt-BR">Português (Brasil)</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="es">Español</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <FontAwesomeIcon icon={faClock} className="h-4 w-4 mr-1" />
+                            Fuso Horário
+                          </label>
+                          <select
+                              value={profile.preferences?.timezone ?? 'America/Sao_Paulo'}
+                              onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="America/Sao_Paulo">América/São Paulo (GMT-3)</option>
+                            <option value="America/New_York">América/Nova York (GMT-5)</option>
+                            <option value="Europe/London">Europa/Londres (GMT+0)</option>
+                            <option value="Europe/Lisbon">Europa/Lisboa (GMT+0)</option>
+                            <option value="America/Los_Angeles">América/Los Angeles (GMT-8)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        disabled={loading.profile}
+                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    >
+                      {loading.profile ? (
+                          <>
+                            <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
+                            Salvando...
+                          </>
+                      ) : (
+                          'Salvar Preferências'
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-          </div>
         )}
 
-        {success.preferences && (
-          <div className="bg-green-50 border-l-4 border-green-500 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <FontAwesomeIcon icon={faCheck} className="h-5 w-5 text-green-500" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-700">{success.preferences}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Notificações</h3>
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="email-notifications"
-                  type="checkbox"
-                  checked={profile.preferences.emailNotifications}
-                  onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
-                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="email-notifications" className="font-medium text-gray-700">
-                  Notificações por email
-                </label>
-                <p className="text-gray-500">
-                  Receba atualizações sobre cursos, novos conteúdos e lembretes por email.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Aparência</h3>
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="dark-mode"
-                  type="checkbox"
-                  checked={profile.preferences.darkMode}
-                  onChange={(e) => handlePreferenceChange('darkMode', e.target.checked)}
-                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="dark-mode" className="font-medium text-gray-700 flex items-center">
-                  <FontAwesomeIcon icon={faMoon} className="mr-2 h-4 w-4" />
-                  Modo escuro
-                </label>
-                <p className="text-gray-500">
-                  Utilizar tema escuro na plataforma para conforto visual.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Idioma e Região</h3>
-          <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-            <div className="space-y-1">
-              <label htmlFor="language" className="text-sm font-medium text-gray-700 flex items-center">
-                <FontAwesomeIcon icon={faLanguage} className="mr-2 h-4 w-4" />
-                Idioma
-              </label>
-              <select
-                id="language"
-                value={profile.preferences.language}
-                onChange={(e) => handlePreferenceChange('language', e.target.value)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="pt-BR">Português (Brasil)</option>
-                <option value="en-US">English (United States)</option>
-                <option value="es-ES">Español</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="timezone" className="text-sm font-medium text-gray-700 flex items-center">
-                <FontAwesomeIcon icon={faClock} className="mr-2 h-4 w-4" />
-                Fuso Horário
-              </label>
-              <select
-                id="timezone"
-                value={profile.preferences.timezone}
-                onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="America/Sao_Paulo">America/Sao_Paulo (GMT-3)</option>
-                <option value="America/New_York">America/New_York (GMT-5/GMT-4)</option>
-                <option value="Europe/London">Europe/London (GMT+0/GMT+1)</option>
-                <option value="Asia/Tokyo">Asia/Tokyo (GMT+9)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={loading.profile}
-            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {loading.profile ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              'Salvar Preferências'
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
-{/* Fechamento da div principal e do componente */}
-</div>
-</div>
-};
+    );
+    };
 
 export default ProfilePage;
