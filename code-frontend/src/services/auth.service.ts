@@ -13,12 +13,19 @@ interface RegisterData {
 
 const authService = {
   async login(credentials: LoginCredentials) {
-  const response = await api.post('/api/auth/login', credentials);
+  console.log('Attempting login with:', credentials);
+  try {
+    const response = await api.post('/api/auth/login', credentials);
+    console.log('Login response:', response.data);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
     }
     return response.data;
-  },
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+},
 
   async register(data: RegisterData) {
     const response = await api.post('/auth/register', data);
