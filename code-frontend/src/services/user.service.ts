@@ -3,7 +3,7 @@ import { UserProfileResponse, UserUpdateRequest } from '../types/user';
 
 const userService = {
   async getUserProfile() {
-    const response = await api.get<UserProfileResponse>('/users/profile');
+  const response = await api.get<UserProfileResponse>('/api/users/me');
     return response.data;
   },
 
