@@ -1,4 +1,6 @@
 export interface Course {
+  totalLessons: number;
+  completedLessons: number;
   progress: string;
   requirements: string[];
   goals: string[];

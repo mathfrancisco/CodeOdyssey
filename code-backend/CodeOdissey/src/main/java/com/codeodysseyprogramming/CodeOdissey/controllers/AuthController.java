@@ -1,20 +1,13 @@
 package com.codeodysseyprogramming.CodeOdissey.controllers;
 
-
 import com.codeodysseyprogramming.CodeOdissey.dto.request.LoginRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.request.SignUpRequest;
 import com.codeodysseyprogramming.CodeOdissey.dto.response.JwtAuthResponse;
-import com.codeodysseyprogramming.CodeOdissey.models.User;
-import com.codeodysseyprogramming.CodeOdissey.security.JwtTokenProvider;
-import com.codeodysseyprogramming.CodeOdissey.services.UserService;
+import com.codeodysseyprogramming.CodeOdissey.services.AuthService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,45 +17,43 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private AuthService authService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-
-     @PostMapping("/login")
+    /**
+     * Endpoint para autenticação de usuários
+     */
+    @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail(),
-                loginRequest.getPassword()
-            )
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
-        User user = userService.getUserByEmail(loginRequest.getEmail());
-
-         return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getEmail(), user.getRole().name()));
+        // Delega a lógica de login para o serviço
+        JwtAuthResponse authResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(authResponse);
     }
 
+    /**
+     * Endpoint para cadastro de novos usuários
+     */
     @PostMapping("/signup")
     public ResponseEntity<JwtAuthResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) throws BadRequestException {
-        if (userService.existsByEmail(signUpRequest.getEmail())) {
-            throw new BadRequestException("Email already registered");
-        }
+        // Delega a lógica de cadastro para o serviço
+        JwtAuthResponse authResponse = authService.signup(signUpRequest);
+        return ResponseEntity.ok(authResponse);
+    }
 
-        User user = userService.createUser(signUpRequest);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        signUpRequest.getEmail(),
-                        signUpRequest.getPassword()
-                )
-        );
+    /**
+     * Endpoint para logout de usuários
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        authService.logout();
+        return ResponseEntity.ok().build();
+    }
 
-        String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthResponse(jwt, user.getId(), user.getEmail(), user.getRole().name()));
-    }}
-
+    /**
+     * Endpoint para validar um token JWT
+     */
+    @PostMapping("/validate")
+    public ResponseEntity<Boolean> validateToken(@RequestParam String token) {
+        boolean isValid = authService.validateToken(token);
+        return ResponseEntity.ok(isValid);
+    }
+}

@@ -27,10 +27,10 @@ const userService = {
     return response.data;
   },
   
-  async getUserStats() {
-    const response = await api.get('/api/users/stats');
-    return response.data;
-  },
+  //async getUserStats() {
+  //  const response = await api.get('/api/users/stats');
+   // return response.data;
+ // ,
   
   async getEnrolledCourses() {
     const response = await api.get('/api/users/courses');
