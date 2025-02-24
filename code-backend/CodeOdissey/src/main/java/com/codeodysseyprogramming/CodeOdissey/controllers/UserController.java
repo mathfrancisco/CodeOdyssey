@@ -27,7 +27,12 @@ public class UserController {
         User user = userService.getUserByEmail(userDetails.getUsername());
         return ResponseEntity.ok(mapToUserProfileResponse(user));
     }
-
+  @GetMapping("/profile")
+  public ResponseEntity<UserProfileResponse> getUserProfile(
+        @AuthenticationPrincipal UserDetails userDetails) {
+    User user = userService.getUserByEmail(userDetails.getUsername());
+    return ResponseEntity.ok(mapToUserProfileResponse(user));
+   }
     @PutMapping("/me")
     public ResponseEntity<UserProfileResponse> updateUser(
             @Valid @RequestBody UserUpdateRequest updateRequest,
